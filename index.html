@@ -1,1915 +1,663 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="h-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MM-Lab ห้องทดลองมัลติมีเดีย</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Kanit:wght@400;600;700&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <title>บทเรียนวิทยาการคำนวณ: การคิดเชิงคำนวณและขั้นตอนวิธี</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              600: '#0284c7',
+              700: '#0369a1',
+            }
+          }
+        }
+      }
+    };
+  </script>
   <style>
     :root {
-      --font-heading: 'Kanit', sans-serif;
-      --font-body: 'Sarabun', sans-serif;
-      --font-mono: 'IBM Plex Mono', monospace;
-
-      --bg-page: #f8fafc;
-      --bg-surface: #ffffff;
-      --bg-surface-elevated: #f1f5f9;
-      --border-color: #cbd5e1;
-      --border-focus: #3b82f6;
-
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --text-subtle: #94a3b8;
-
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --primary-light: #eff6ff;
-
-      --success-bg: #ecfdf5;
-      --success-border: #10b981;
-      --success-text: #065f46;
-      --success-badge: #10b981;
-
-      --fail-bg: #fef2f2;
-      --fail-border: #ef4444;
-      --fail-text: #991b1b;
-
-      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-      --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 16px;
+      --font-body: -apple-system, BlinkMacSystemFont, "Sarabun", "Segoe UI", Roboto, sans-serif;
     }
-
-    [data-theme="dark"] {
-      --bg-page: #0b0f19;
-      --bg-surface: #151d2f;
-      --bg-surface-elevated: #1e293b;
-      --border-color: #334155;
-      --border-focus: #60a5fa;
-
-      --text-main: #f1f5f9;
-      --text-muted: #94a3b8;
-      --text-subtle: #64748b;
-
-      --primary: #3b82f6;
-      --primary-hover: #60a5fa;
-      --primary-light: #1e3a8a33;
-
-      --success-bg: #064e3b33;
-      --success-border: #059669;
-      --success-text: #34d399;
-      --success-badge: #059669;
-
-      --fail-bg: #7f1d1d33;
-      --fail-border: #dc2626;
-      --fail-text: #f87171;
-
-      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --bg-page: #0b0f19;
-        --bg-surface: #151d2f;
-        --bg-surface-elevated: #1e293b;
-        --border-color: #334155;
-        --border-focus: #60a5fa;
-
-        --text-main: #f1f5f9;
-        --text-muted: #94a3b8;
-        --text-subtle: #64748b;
-
-        --primary: #3b82f6;
-        --primary-hover: #60a5fa;
-        --primary-light: #1e3a8a33;
-
-        --success-bg: #064e3b33;
-        --success-border: #059669;
-        --success-text: #34d399;
-        --success-badge: #059669;
-
-        --fail-bg: #7f1d1d33;
-        --fail-border: #dc2626;
-        --fail-text: #f87171;
-
-        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-      }
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
       font-family: var(--font-body);
-      background-color: var(--bg-page);
-      color: var(--text-main);
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow-x: hidden;
+      font-size: 17px;
+      line-height: 1.7;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
     }
-
-    h1, h2, h3, h4 {
-      font-family: var(--font-heading);
-      font-weight: 600;
-      line-height: 1.25;
-    }
-
-    .mono {
-      font-family: var(--font-mono);
-    }
-
-    .container {
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 1rem 1.25rem;
-    }
-
-    .app-header {
-      background: var(--bg-surface);
-      border-bottom: 1px solid var(--border-color);
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      box-shadow: var(--card-shadow);
-    }
-
-    .header-content {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      padding: 0.85rem 1.25rem;
-    }
-
-    @media (min-width: 768px) {
-      .header-content {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-      }
-    }
-
-    .brand-wrap {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .brand-logo {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
-      border-radius: var(--radius-sm);
-      display: grid;
-      place-items: center;
-      color: #fff;
-      font-weight: 700;
-      font-family: var(--font-heading);
-      font-size: 1.2rem;
-      flex-shrink: 0;
-    }
-
-    .badges-strip {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      align-items: center;
-    }
-
-    .badge-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.25rem 0.65rem;
-      border-radius: 9999px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      border: 1px solid var(--border-color);
-      background: var(--bg-surface-elevated);
-      color: var(--text-muted);
-      transition: all 0.25s ease;
-    }
-
-    .badge-item.completed {
-      background: var(--success-bg);
-      border-color: var(--success-border);
-      color: var(--success-text);
-    }
-
-    .badge-icon {
-      font-size: 0.9rem;
-    }
-
-    .theme-toggle-btn {
-      background: transparent;
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 0.4rem 0.75rem;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-family: var(--font-body);
-      font-size: 0.85rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
-
-    .tabs-bar {
-      display: flex;
-      overflow-x: auto;
-      gap: 0.35rem;
-      padding: 0.5rem 0;
-      border-bottom: 2px solid var(--border-color);
-      margin-top: 1rem;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
-    }
-
-    .tab-btn {
-      white-space: nowrap;
-      background: none;
-      border: none;
-      padding: 0.65rem 1.1rem;
-      font-family: var(--font-heading);
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      cursor: pointer;
-      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-      position: relative;
-      transition: color 0.2s, background-color 0.2s;
-    }
-
-    .tab-btn:hover {
-      color: var(--text-main);
-      background-color: var(--bg-surface-elevated);
-    }
-
-    .tab-btn.active {
-      color: var(--primary);
-      font-weight: 600;
-    }
-
-    .tab-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: var(--primary);
-      border-radius: 3px 3px 0 0;
-    }
-
-    .station-panel {
-      display: none;
-      padding-top: 1.5rem;
-    }
-
-    .station-panel.active {
-      display: block;
-    }
-
-    .lab-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-
-    @media (min-width: 900px) {
-      .lab-grid {
-        grid-template-columns: 420px 1fr;
-      }
-    }
-
-    .controls-card, .canvas-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 1.25rem;
-      box-shadow: var(--card-shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 1.15rem;
-    }
-
-    /* Form controls & touch targets */
-    .ctrl-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    .ctrl-label-wrap {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-
-    .ctrl-val {
-      color: var(--primary);
-      font-weight: 600;
-    }
-
-    input[type="range"] {
-      -webkit-appearance: none;
-      width: 100%;
-      height: 8px;
-      border-radius: 4px;
-      background: var(--border-color);
-      outline: none;
-      margin: 0.5rem 0;
-      cursor: pointer;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: var(--primary);
-      border: 2px solid #ffffff;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      cursor: pointer;
-    }
-
-    input[type="range"]::-moz-range-thumb {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: var(--primary);
-      border: 2px solid #ffffff;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      cursor: pointer;
-    }
-
-    input[type="color"] {
-      -webkit-appearance: none;
-      border: 1px solid var(--border-color);
-      width: 100%;
-      height: 42px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      background: transparent;
-      padding: 2px;
-    }
-
-    select, button {
-      min-height: 44px;
-      font-family: var(--font-body);
-      font-size: 0.95rem;
-      border-radius: var(--radius-sm);
-    }
-
-    select {
-      background: var(--bg-surface);
-      color: var(--text-main);
-      border: 1px solid var(--border-color);
-      padding: 0.5rem;
-    }
-
-    .btn-action {
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      padding: 0.65rem 1.25rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      transition: background-color 0.2s, transform 0.1s;
-    }
-
-    .btn-action:hover {
-      background: var(--primary-hover);
-    }
-
-    .btn-action:active {
-      transform: scale(0.98);
-    }
-
-    .mission-box {
-      border: 1.5px dashed var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 1rem;
-      background: var(--bg-surface-elevated);
-      transition: all 0.3s ease;
-    }
-
-    .mission-box.completed {
-      border-style: solid;
-      border-color: var(--success-border);
-      background: var(--success-bg);
-      color: var(--success-text);
-    }
-
-    .mission-title {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-weight: 700;
-      font-size: 0.95rem;
-      margin-bottom: 0.35rem;
-    }
-
-    .stats-card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 0.75rem;
-    }
-
-    .stat-pill {
-      background: var(--bg-surface-elevated);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      padding: 0.5rem 0.75rem;
-    }
-
-    .stat-pill .label {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      display: block;
-    }
-
-    .stat-pill .val {
-      font-family: var(--font-mono);
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    .badge-pill-pass {
-      display: inline-block;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      background: var(--success-bg);
-      color: var(--success-text);
-      border: 1px solid var(--success-border);
-    }
-
-    .badge-pill-fail {
-      display: inline-block;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      background: var(--fail-bg);
-      color: var(--fail-text);
-      border: 1px solid var(--fail-border);
-    }
-
-    /* Custom visual boxes for canvases */
-    .preview-stage {
-      background: #000;
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid var(--border-color);
-      min-height: 260px;
-      position: relative;
-    }
-
-    canvas {
-      display: block;
-      max-width: 100%;
-      height: auto;
-    }
-
-    /* Quiz styles */
-    .quiz-card {
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 1.25rem;
-      background: var(--bg-surface);
-      margin-bottom: 1.25rem;
-    }
-
-    .quiz-options {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-top: 0.75rem;
-    }
-
-    .quiz-opt-btn {
-      text-align: left;
-      padding: 0.75rem 1rem;
-      border: 1px solid var(--border-color);
-      background: var(--bg-surface-elevated);
-      color: var(--text-main);
-      cursor: pointer;
-      border-radius: var(--radius-sm);
-      transition: all 0.2s;
-    }
-
-    .quiz-opt-btn:hover:not(:disabled) {
-      border-color: var(--primary);
-      background: var(--primary-light);
-    }
-
-    .quiz-opt-btn.correct {
-      background: var(--success-bg);
-      border-color: var(--success-border);
-      color: var(--success-text);
-      font-weight: 600;
-    }
-
-    .quiz-opt-btn.wrong {
-      background: var(--fail-bg);
-      border-color: var(--fail-border);
-      color: var(--fail-text);
-    }
-
-    .quiz-feedback {
-      margin-top: 0.75rem;
-      padding: 0.75rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.9rem;
-      display: none;
-    }
-
-    /* Respect reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        animation-duration: 0.001ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.001ms !important;
-      }
-    }
-
-    footer {
-      margin-top: auto;
-      background: var(--bg-surface);
-      border-top: 1px solid var(--border-color);
-      padding: 1.5rem 1.25rem;
-      color: var(--text-muted);
-      font-size: 0.85rem;
+    .content-measure {
+      max-width: 68ch;
     }
   </style>
 </head>
-<body>
+<body class="min-h-full bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 flex flex-col transition-colors duration-200">
 
-  <header class="app-header">
-    <div class="header-content container">
-      <div class="brand-wrap">
-        <div class="brand-logo">MM</div>
-        <div>
-          <h1 style="font-size: 1.2rem;">MM-Lab ห้องทดลองมัลติมีเดีย</h1>
-          <p style="font-size: 0.8rem; color: var(--text-muted);">สื่อการเรียนรู้เชิงโต้ตอบสำหรับนักศึกษาครูคอมพิวเตอร์</p>
-        </div>
+  <!-- Header Bar -->
+  <header class="border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <span class="inline-block w-3 h-3 rounded-full bg-sky-600 dark:bg-sky-400"></span>
+        <span class="font-semibold tracking-tight text-slate-900 dark:text-white text-base md:text-lg">CompThinking Lab</span>
       </div>
-
-      <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
-        <div class="badges-strip" id="badges-container">
-          <span class="badge-item" id="badge-1"><span class="badge-icon">✏️</span> ข้อความ</span>
-          <span class="badge-item" id="badge-2"><span class="badge-icon">🖼️</span> ภาพ</span>
-          <span class="badge-item" id="badge-3"><span class="badge-icon">🎵</span> เสียง</span>
-          <span class="badge-item" id="badge-4"><span class="badge-icon">🎬</span> วิดีโอ</span>
-          <span class="badge-item" id="badge-5"><span class="badge-icon">🏆</span> ภารกิจสรุป</span>
-        </div>
-        <button class="theme-toggle-btn" id="theme-toggle-btn" aria-label="สลับธีม">🌓 ธีม</button>
+      <div class="flex items-center space-x-3 text-sm">
+        <span id="step-indicator" class="text-slate-500 dark:text-slate-400 font-medium">ขั้นตอนที่ 1/4</span>
+        <button id="theme-toggle" type="button" aria-label="สลับธีม" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <svg id="theme-icon-light" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
+          <svg id="theme-icon-dark" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+        </button>
       </div>
     </div>
   </header>
 
-  <main class="container" style="flex: 1;">
-    <!-- Navigation Tabs -->
-    <nav class="tabs-bar" role="tablist">
-      <button class="tab-btn active" role="tab" data-tab="tab-1">สถานี 1: ข้อความ & สี</button>
-      <button class="tab-btn" role="tab" data-tab="tab-2">สถานี 2: ภาพดิจิทัล</button>
-      <button class="tab-btn" role="tab" data-tab="tab-3">สถานี 3: เสียงดิจิทัล</button>
-      <button class="tab-btn" role="tab" data-tab="tab-4">สถานี 4: วิดีโอดิจิทัล</button>
-      <button class="tab-btn" role="tab" data-tab="tab-5">สถานี 5: ภารกิจสรุป</button>
-    </nav>
+  <!-- Main Container -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8 md:py-12">
+    <div class="content-measure mx-auto">
 
-    <section class="station-panel active" id="tab-1" role="tabpanel">
-      <div class="lab-grid">
-        <div class="controls-card">
-          <h2>ตัวควบคุมข้อความ & สี</h2>
-          <p style="font-size: 0.9rem; color: var(--text-muted);">
-            ทดลองปรับสีและขนาดอักษรเพื่อตรวจสอบความสว่างสัมพัทธ์และความชัดเจนในการอ่านตามเกณฑ์สากล WCAG 2.1
+      <!-- View 1: Pre-test -->
+      <section id="view-pretest" class="space-y-6">
+        <header class="border-b border-slate-200 dark:border-slate-800 pb-4">
+          <p class="text-xs uppercase tracking-wider font-semibold text-sky-600 dark:text-sky-400">แบบประเมินเริ่มต้น</p>
+          <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mt-1">แบบทดสอบก่อนเรียน (Pre-test)</h1>
+          <p class="text-slate-600 dark:text-slate-400 mt-2">
+            ทำแบบทดสอบจำนวน 8 ข้อเพื่อวัดระดับความรู้เบื้องต้นเกี่ยวกับกระบวนการคิดเชิงคำนวณและขั้นตอนวิธี ไม่ต้องกังวลเรื่องคะแนน
           </p>
-
-          <div class="ctrl-group">
-            <div class="ctrl-label-wrap">
-              <label for="fg-color">สีตัวอักษร (Foreground)</label>
-              <span id="fg-val" class="ctrl-val mono">#94a3b8</span>
-            </div>
-            <input type="color" id="fg-color" value="#94a3b8">
-          </div>
-
-          <div class="ctrl-group">
-            <div class="ctrl-label-wrap">
-              <label for="bg-color">สีพื้นหลัง (Background)</label>
-              <span id="bg-val" class="ctrl-val mono">#ffffff</span>
-            </div>
-            <input type="color" id="bg-color" value="#ffffff">
-          </div>
-
-          <div class="ctrl-group">
-            <div class="ctrl-label-wrap">
-              <label for="font-size-slider">ขนาดตัวอักษร</label>
-              <span id="font-size-val" class="ctrl-val mono">16 px</span>
-            </div>
-            <input type="range" id="font-size-slider" min="12" max="40" value="16">
-          </div>
-
-          <div class="ctrl-group">
-            <label for="font-weight-select" style="font-size: 0.9rem; font-weight: 600;">ความหนาตัวอักษร</label>
-            <select id="font-weight-select">
-              <option value="400" selected>ปกติ (Regular / 400)</option>
-              <option value="700">หนา (Bold / 700)</option>
-            </select>
-          </div>
-
-          <div class="mission-box" id="mission-1-box">
-            <div class="mission-title">
-              <span>🎯 ภารกิจสถานี 1</span>
-              <span id="mission-1-flag" style="margin-left:auto; font-size:0.8rem;">กำลังดำเนินการ</span>
-            </div>
-            <p style="font-size: 0.85rem;">
-              ปรับสีข้อความให้มีอัตราส่วนความต่างสีผ่าน <strong>ระดับ AA (อย่างน้อย 4.5:1)</strong> โดยต้องมี<strong>ขนาดตัวอักษรไม่เกิน 18 px</strong> และใช้<strong>น้ำหนักปกติ (Regular)</strong>
-            </p>
-          </div>
-        </div>
-
-        <div class="canvas-card">
-          <h2>ผลการวิเคราะห์ & ตัวอย่างสด</h2>
-
-          <div class="stats-card-grid">
-            <div class="stat-pill">
-              <span class="label">อัตราส่วนความต่าง (Ratio)</span>
-              <span class="val" id="stat-contrast-ratio">--</span>
-            </div>
-            <div class="stat-pill">
-              <span class="label">L ข้อความ / พื้นหลัง</span>
-              <span class="val" id="stat-luminance">--</span>
-            </div>
-            <div class="stat-pill">
-              <span class="label">เกณฑ์ WCAG AA</span>
-              <span id="stat-aa-badge" class="badge-pill-fail">ไม่ผ่าน</span>
-            </div>
-            <div class="stat-pill">
-              <span class="label">เกณฑ์ WCAG AAA</span>
-              <span id="stat-aaa-badge" class="badge-pill-fail">ไม่ผ่าน</span>
-            </div>
-          </div>
-
-          <!-- Live Visual Preview -->
-          <div id="text-preview-box" style="border: 2px solid var(--border-color); border-radius: var(--radius-md); padding: 1.75rem; min-height: 220px; display: flex; flex-direction: column; justify-content: center; transition: background-color 0.15s;">
-            <p id="preview-text-th" style="margin-bottom: 0.75rem;">
-              การออกแบบสื่อดิจิทัลเพื่อการศึกษาที่ดี ต้องคำนึงถึงความสะดวกในการเข้าถึง (Accessibility) และความง่ายในการอ่าน
-            </p>
-            <p id="preview-text-en">
-              Digital Multimedia Learning Design: Typography, Readability & WCAG Compliance. (0123456789)
-            </p>
-          </div>
-
-          <div style="font-size: 0.85rem; color: var(--text-muted); background: var(--bg-surface-elevated); padding: 0.75rem; border-radius: var(--radius-sm);">
-            💡 <strong>เกณฑ์ WCAG 2.1:</strong> ข้อความขนาดปกติ (ต่ำกว่า 24px หรือต่ำกว่า 18.66px เมื่อเป็นตัวหนา) ต้องได้ Ratio ≥ 4.5:1 สำหรับ AA และ ≥ 7.0:1 สำหรับ AAA
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="station-panel" id="tab-2" role="tabpanel">
-      <div class="lab-grid">
-        <div class="controls-card">
-          <h2>ตัวควบคุมภาพดิจิทัล</h2>
-          <p style="font-size: 0.9rem; color: var(--text-muted);">
-            ภาพต้นฉบับ 1280×720 พิกเซล สังเกตผลของการลดความละเอียดพิกเซลและการจำกัดจำนวนบิตสี
-          </p>
-
-          <div class="ctrl-group">
-            <div class="ctrl-label-wrap">
-              <label for="img-scale-slider">ความละเอียด (Resolution Scale)</label>
-              <span id="img-scale-val" class="ctrl-val mono">100%</span>
-            </div>
-            <input type="range" id="img-scale-slider" min="3" max="100" value="100">
-            <span style="font-size:0.75rem; color:var(--text-muted);" id="img-dims-val">1280 × 720 พิกเซล</span>
-          </div>
-
-          <div class="ctrl-group">
-            <div class="ctrl-label-wrap">
-              <label for="img-bpc-slider">ความลึกบิตต่อช่องสี (Bit Depth / Channel)</label>
-              <span id="img-bpc-val" class="ctrl-val mono">8 บิต/ช่อง</span>
-            </div>
-            <input type="range" id="img-bpc-slider" min="1" max="8" value="8">
-            <span style="font-size:0.75rem; color:var(--text-muted);" id="img-total-colors">16,777,216 สี (24-bit TrueColor)</span>
-          </div>
-
-          <!-- Color Mixing Visualizer -->
-          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem;">
-            <div style="font-size:0.85rem; font-weight:600; margin-bottom: 0.35rem;">ทดลองจำลองควอนไทเซชันสี (Quantization Preview)</div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
-              <div>
-                <label style="font-size: 0.75rem;">R: <span id="r-val" class="mono">200</span></label>
-                <input type="range" id="test-r" min="0" max="255" value="200" style="margin:0;">
-              </div>
-              <div>
-                <label style="font-size: 0.75rem;">G: <span id="g-val" class="mono">120</span></label>
-                <input type="range" id="test-g" min="0" max="255" value="120" style="margin:0;">
-              </div>
-              <div>
-                <label style="font-size: 0.75rem;">B: <span id="b-val" class="mono">80</span></label>
-                <input type="range" id="test-b" min="0" max="255" value="80" style="margin:0;">
-              </div>
-            </div>
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 0.5rem; font-size: 0.8rem;">
-              <span>สีที่ได้หลังจัดระดับ: <span id="color-hex-out" class="mono font-bold">#C87850</span></span>
-              <div id="color-swatch-out" style="width: 28px; height: 20px; border-radius: 4px; border: 1px solid #000; background: #C87850;"></div>
-            </div>
-          </div>
-
-          <div class="mission-box" id="mission-2-box">
-            <div class="mission-title">
-              <span>🎯 ภารกิจสถานี 2</span>
-              <span id="mission-2-flag" style="margin-left:auto; font-size:0.8rem;">กำลังดำเนินการ</span>
-            </div>
-            <p style="font-size: 0.85rem;">
-              ปรับให้ขนาดข้อมูลภาพดิบ<strong>ต่ำกว่า 1 MB (1,048,576 ไบต์)</strong> โดยต้อง<strong>คงความลึกบิตไว้ที่ 8 บิต/ช่องสี</strong> และความกว้างภาพ<strong>ไม่ต่ำกว่า 640 พิกเซล</strong>
-            </p>
-          </div>
-        </div>
-
-        <div class="canvas-card">
-          <h2>จอภาพแสดงผล (Pixelation & Quantization)</h2>
-
-          <div class="stats-card-grid">
-            <div class="stat-pill">
-              <span class="label">มิติพิกเซลที่คำนวณ</span>
-              <span class="val" id="stat-img-res">1280×720</span>
-            </div>
-            <div class="stat-pill">
-              <span class="label">ระดับสีที่เป็นไปได้</span>
-              <span class="val" id="stat-img-colors">16.7M</span>
-            </div>
-            <div class="stat-pill">
-              <span class="label">ขนาดไฟล์ดิบ (Raw Size)</span>
-              <span class="val" id="stat-img-bytes">2,764,800 B</span>
-            </div>
-            <div class="stat-pill">
-              <span class="label">เทียบเป็น เมกะไบต์ (MB)</span>
-              <span class="val" id="stat-img-mb">2.64 MB</span>
-            </div>
-          </div>
-
-          <div class="preview-stage" style="aspect-ratio: 16/9; width: 100%;">
-            <canvas id="image-canvas" width="640" height="360" style="width:100%; height:auto;"></canvas>
-          </div>
-
-          <p style="font-size: 0.8rem; color: var(--text-muted);">
-            สูตรคำนวณ: ขนาดดิบ (ไบต์) = ความกว้าง × ความสูง × (บิตต่อช่องสี × 3 ช่อง RGB) / 8 ไบต์
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <section class="station-panel" id="tab-3" role="tabpanel">
-      <div class="lab-grid">
-        <div class="controls-card">
-          <h2>ตัวควบคุมเสียงดิจิทัล</h2>
-          <p style="font-size: 0.9rem; color: var(--text-muted);">
-            จำลองการแปลงสัญญาณแอนะล็อกเป็นดิจิทัล (ADC) ของคลื่นไซน์ความถี่คงที่ <strong>440 Hz (โน้ต A4)</strong> จำนวน 2 คาบเวลา
-          </p>
-
-          <div class="ctrl-group">
-            <label for="audio-rate-select" style="font-size:0.9rem; font-weight:600;">อัตราการสุ่มตัวอย่าง (Sampling Rate)</label>
-            <select id="audio-rate-select">
-              <option value="500">500 Hz (ต่ำมาก)</option>
-              <option value="800">800 Hz (ต่ำกว่าขีด Nyquist)</option>
-              <option value="1000">1,000 Hz</option>
-              <option value="2000">2,000 Hz</option>
-              <option value="4000">4,000 Hz</option>
-              <option value="8000" selected>8,000 Hz (ระดับโทรศัพท์)</option>
-              <option value="11025">11,025 Hz</option>
-              <option value="22050">22,050 Hz (วิทยุ FM)</option>
-              <option value="44100">44,100 Hz (Audio CD)</option>
-            </select>
-          </div>
-
-          <div class="ctrl-group">
-            <div class="ctrl-label-wrap">
-              <label for="audio-bits-slider">ความลึกบิต (Bit Depth / Resolution)</label>
-              <span id="audio-bits-val" class="ctrl-val mono">8 บิต</span>
-            </div>
-            <input type="range" id="audio-bits-slider" min="1" max="16" value="8">
-            <span style="font-size:0.75rem; color:var(--text-muted);" id="audio-levels-val">256 ระดับแรงดันไฟฟ้า</span>
-          </div>
-
-          <div style="display:flex; flex-direction:column; gap:0.5rem;">
-            <button class="btn-action" id="btn-play-audio">
-              <span>🔊 ฟังเสียง 1 วินาที (Web Audio API)</span>
+          <div class="mt-3 flex items-center gap-2">
+            <button type="button" onclick="loadTestPreset(4)" class="text-xs underline text-sky-600 dark:text-sky-400 hover:text-sky-700">
+              [ทดสอบเร็ว: เลือกล่วงหน้าให้ได้ 4/8]
             </button>
-            <div id="audio-msg-notice" style="font-size:0.8rem; color:var(--text-muted); display:none; background:var(--bg-surface-elevated); padding:0.5rem; border-radius:var(--radius-sm);"></div>
           </div>
+        </header>
 
-          <div class="mission-box" id="mission-3-box">
-            <div class="mission-title">
-              <span>🎯 ภารกิจสถานี 3</span>
-              <span id="mission-3-flag" style="margin-left:auto; font-size:0.8rem;">กำลังดำเนินการ</span>
-            </div>
-            <p style="font-size: 0.85rem;">
-              ตั้งค่าให้<strong>ผ่านเกณฑ์ Nyquist Theorem</strong> โดยใช้ความลึกบิต<strong>ตั้งแต่ 8 บิตขึ้นไป</strong> และมีอัตราการส่งข้อมูลดิบ<strong>ไม่เกิน 20 KB/s (กิโลไบต์/วินาที)</strong>
+        <!-- จุดแก้ที่ 2: เพิ่ม novalidate เพื่อให้ระบบตรวจสอบผ่าน JS แสดงข้อความเตือนอย่างสมบูรณ์ -->
+        <form id="form-pretest" novalidate class="space-y-8" onsubmit="event.preventDefault(); submitPretest();">
+          <div id="pretest-questions-container" class="space-y-8"></div>
+          
+          <div class="pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <span id="pretest-validation-msg" class="text-sm text-rose-500 font-medium" role="alert"></span>
+            <button type="submit" class="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-medium transition">
+              ส่งคำตอบและเข้าสู่บทเรียน &rarr;
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- View 2: Lesson Content -->
+      <section id="view-lesson" class="space-y-8 hidden">
+        <header class="border-b border-slate-200 dark:border-slate-800 pb-4">
+          <p class="text-xs uppercase tracking-wider font-semibold text-emerald-600 dark:text-emerald-400">เนื้อหาบทเรียน</p>
+          <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mt-1">4 เสาหลักการคิดเชิงคำนวณ (Computational Thinking)</h1>
+          <p class="text-slate-600 dark:text-slate-400 mt-2">
+            กระบวนการคิดแก้ปัญหาอย่างเป็นระบบ เพื่อให้มนุษย์หรือคอมพิวเตอร์นำคำสั่งไปปฏิบัติตามได้อย่างแม่นยำ
+          </p>
+        </header>
+
+        <article class="space-y-8">
+          <section class="space-y-3">
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span class="text-sky-600 dark:text-sky-400 font-mono">01.</span> การแยกส่วนประกอบ (Decomposition)
+            </h2>
+            <p class="text-slate-700 dark:text-slate-300">
+              การแตกปัญหาใหญ่หรือระบบที่ซับซ้อนออกเป็นส่วนย่อย ๆ เพื่อให้ง่ายต่อการวิเคราะห์และจัดการ เช่น การสร้างเว็บแอปพลิเคชัน จะแยกออกเป็นส่วนหน้าบ้าน (UI), ส่วนประมวลผล (Logic), และฐานข้อมูล (Database)
             </p>
-          </div>
-        </div>
+          </section>
 
-        <div class="canvas-card">
-          <h2>รูปคลื่นจำลอง (Sampling & Quantization Steps)</h2>
-
-          <div class="stats-card-grid">
-            <div class="stat-pill">
-              <span class="label">เกณฑ์ Nyquist (> 880 Hz)</span>
-              <span class="val" id="stat-nyquist-status">--</span>
-            </div>
-            <div class="stat-pill">
-              <span class="label">จุดสุ่มต่อ 1 คาบ (Points/Period)</span>
-              <span class="val" id="stat-audio-points">--</span>
-            </div>
-            <div class="stat-pill">
-              <span class="label">จำนวนระดับแรงดัน</span>
-              <span class="val" id="stat-audio-levels">--</span>
-            </div>
-            <div class="stat-pill">
-              <span class="label">อัตราข้อมูลดิบ (Raw Bitrate)</span>
-              <span class="val" id="stat-audio-rate">--</span>
-            </div>
-          </div>
-
-          <div class="preview-stage" style="background: #0f172a; padding: 10px;">
-            <canvas id="audio-wave-canvas" width="700" height="260" style="width: 100%; height: auto;"></canvas>
-          </div>
-
-          <div style="font-size:0.8rem; color:var(--text-muted); display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
-            <span>🟢 เส้นเขียว: สัญญาณต้นฉบับ 440 Hz</span>
-            <span>🔴 จุดแดง: ตำแหน่งที่ทำการสุ่ม (Sampling)</span>
-            <span>🟠 ขั้นบันไดสีส้ม: คลื่นที่ถูกจัดระดับ (Quantized)</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="station-panel" id="tab-4" role="tabpanel">
-      <div class="lab-grid">
-        <div class="controls-card">
-          <h2>ตัวควบคุมวิดีโอดิจิทัล</h2>
-          <p style="font-size: 0.9rem; color: var(--text-muted);">
-            วิดีโอ 1280×720 (720p HD) 24-bit TrueColor สังเกตความต่อเนื่องของการเคลื่อนที่และอัตราข้อมูลมหาศาล
-          </p>
-
-          <div class="ctrl-group">
-            <div class="ctrl-label-wrap">
-              <label for="video-fps-slider">อัตราเฟรม (Frame Rate)</label>
-              <span id="video-fps-val" class="ctrl-val mono">30 FPS</span>
-            </div>
-            <input type="range" id="video-fps-slider" min="2" max="60" value="30">
-          </div>
-
-          <div class="ctrl-group">
-            <div class="ctrl-label-wrap">
-              <label for="video-comp-slider">อัตราส่วนการบีบอัดสมมติ (Compression Ratio)</label>
-              <span id="video-comp-val" class="ctrl-val mono">1 : 1 (ไม่มีการบีบอัด)</span>
-            </div>
-            <input type="range" id="video-comp-slider" min="0" max="100" value="0">
-            <span style="font-size:0.75rem; color:var(--text-muted);">สเกลลอการิทึม 1:1 ถึง 300:1 (จำลองตามความจริงที่วิดีโอต้องถูกบีบอัด)</span>
-          </div>
-
-          <div class="mission-box" id="mission-4-box">
-            <div class="mission-title">
-              <span>🎯 ภารกิจสถานี 4</span>
-              <span id="mission-4-flag" style="margin-left:auto; font-size:0.8rem;">กำลังดำเนินการ</span>
-            </div>
-            <p style="font-size: 0.85rem;">
-              ปรับให้อัตราข้อมูลหลังบีบอัด<strong>ไม่เกิน 5 Mbit/s (เมกะบิตต่อวินาที)</strong> เพื่อให้เหมาะแก่การสตรีมมิง โดยต้องรักษาอัตราเฟรม<strong>ไม่ต่ำกว่า 24 FPS</strong> (เกณฑ์ภาพยนตร์นุ่มนวล)
+          <section class="space-y-3">
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span class="text-sky-600 dark:text-sky-400 font-mono">02.</span> การหารูปแบบ (Pattern Recognition)
+            </h2>
+            <p class="text-slate-700 dark:text-slate-300">
+              การค้นหาความคล้ายคลึง แนวโน้ม หรือพฤติกรรมที่เกิดขึ้นซ้ำ ๆ ในข้อมูล เพื่อนำแนวทางแก้ปัญหาเดิมมาปรับใช้ซ้ำได้ เช่น การสังเกตว่าการค้นหาข้อมูลในตารางที่มีการเรียงลำดับแล้วสามารถใช้วิธี Binary Search ได้เสมอ
             </p>
+          </section>
+
+          <section class="space-y-3">
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span class="text-sky-600 dark:text-sky-400 font-mono">03.</span> การคิดเชิงนามธรรม (Abstraction)
+            </h2>
+            <p class="text-slate-700 dark:text-slate-300">
+              การมุ่งเน้นเฉพาะข้อมูลสำคัญที่จำเป็นต่อการแก้ปัญหา และตัดรายละเอียดที่ไม่เกี่ยวข้องออก เช่น แผนผังรถไฟฟ้าใต้ดินที่ระบุเฉพาะชื่อสถานีและจุดเชื่อมต่อ โดยตัดรายละเอียดความคดเคี้ยวของถนนจริงบนพื้นผิวออกไป
+            </p>
+          </section>
+
+          <section class="space-y-3">
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span class="text-sky-600 dark:text-sky-400 font-mono">04.</span> การออกแบบขั้นตอนวิธี (Algorithm Design)
+            </h2>
+            <p class="text-slate-700 dark:text-slate-300">
+              การวางลำดับขั้นตอนหรือเงื่อนไขในการแก้ปัญหาทีละสเต็ปอย่างชัดเจนจนได้ผลลัพธ์ที่ถูกต้อง ไม่กำกวม และสามารถทำซ้ำได้ตามเงื่อนไขที่กำหนด
+            </p>
+          </section>
+
+          <!-- Interactive Micro-Check -->
+          <div class="p-5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <h3 class="font-semibold text-slate-900 dark:text-white mb-2">ทดสอบความเข้าใจระหว่างเรียน</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mb-3">
+              "การวาดผังงาน (Flowchart) เพื่ออธิบายขั้นตอนการชงกาแฟ" สอดคล้องกับเสาหลักใดมากที่สุด?
+            </p>
+            <div class="flex flex-wrap gap-2 text-sm">
+              <button type="button" onclick="checkMiniQuiz(this, false)" class="px-3 py-1.5 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800">Decomposition</button>
+              <button type="button" onclick="checkMiniQuiz(this, false)" class="px-3 py-1.5 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800">Abstraction</button>
+              <button type="button" onclick="checkMiniQuiz(this, true)" class="px-3 py-1.5 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800">Algorithm Design</button>
+            </div>
+            <p id="mini-quiz-feedback" class="text-xs mt-2 font-medium"></p>
           </div>
+        </article>
+
+        <div class="pt-6 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
+          <button type="button" onclick="goToView('pretest')" class="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+            &larr; ทบทวนแบบทดสอบก่อนเรียน
+          </button>
+          <button type="button" onclick="goToView('posttest')" class="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-medium transition">
+            เริ่มทำแบบทดสอบหลังเรียน &rarr;
+          </button>
         </div>
+      </section>
 
-        <div class="canvas-card">
-          <h2>จอภาพจำลองการเคลื่อนไหว & ปริมาณข้อมูล</h2>
-
-          <div class="stats-card-grid">
-            <div class="stat-pill">
-              <span class="label">ข้อมูลดิบ / 1 เฟรม</span>
-              <span class="val mono" id="stat-vid-raw-frame">2.76 MB</span>
-            </div>
-            <div class="stat-pill">
-              <span class="label">อัตราบิตดิบ (Raw Bitrate)</span>
-              <span class="val mono" id="stat-vid-raw-bitrate">663.55 Mbit/s</span>
-            </div>
-            <div class="stat-pill">
-              <span class="label">อัตราบิตหลังบีบอัด</span>
-              <span class="val mono" id="stat-vid-comp-bitrate">663.55 Mbit/s</span>
-            </div>
-            <div class="stat-pill">
-              <span class="label">ขนาดวิดีโอต่อ 1 นาที</span>
-              <span class="val mono" id="stat-vid-minute-size">4,976 MB</span>
-            </div>
-          </div>
-
-          <div class="preview-stage" style="aspect-ratio: 16/9; width: 100%;">
-            <canvas id="video-canvas" width="640" height="360" style="width: 100%; height: auto;"></canvas>
-          </div>
-
-          <p style="font-size:0.8rem; color:var(--text-muted);">
-            * หมายเหตุ: อัตราส่วนการบีบอัดในสถานีนี้เป็นค่าสมมติเพื่อการเปรียบเทียบ ในสภาพจริงอัตราการบีบอัดจะขึ้นกับตัวแปลงสัญญาณ (Codec เช่น H.264, H.265, AV1) และความซับซ้อนของแต่ละฉาก
+      <!-- View 3: Post-test -->
+      <section id="view-posttest" class="space-y-6 hidden">
+        <header class="border-b border-slate-200 dark:border-slate-800 pb-4">
+          <p class="text-xs uppercase tracking-wider font-semibold text-amber-600 dark:text-amber-400">แบบประเมินผลสัมฤทธิ์</p>
+          <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mt-1">แบบทดสอบหลังเรียน (Post-test)</h1>
+          <p class="text-slate-600 dark:text-slate-400 mt-2">
+            ทำแบบทดสอบข้อเดิม 8 ข้อหลังเรียนรู้เนื้อหา เพื่อวัดอัตราการพัฒนาสัมพัทธ์ (Normalized Gain)
           </p>
-        </div>
-      </div>
-    </section>
+          <div class="mt-3 flex items-center gap-2">
+            <button type="button" onclick="loadPostPreset(6)" class="text-xs underline text-sky-600 dark:text-sky-400 hover:text-sky-700">
+              [ทดสอบเร็ว: เลือกล่วงหน้าให้ได้ 6/8]
+            </button>
+          </div>
+        </header>
 
-    <section class="station-panel" id="tab-5" role="tabpanel">
-      <div style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem;">
-        <div class="controls-card">
-          <h2>แบบทดสอบสรุปองค์ความรู้มัลติมีเดีย</h2>
-          <p style="font-size: 0.95rem; color: var(--text-muted);">
-            ทดสอบความเข้าใจจากประสบการณ์ในห้องทดลอง ตอบคำถามสถานการณ์จริงทั้ง 5 ข้อให้ถูกต้องครบทั้งหมดเพื่อปลดล็อกตราภารกิจสรุป
-          </p>
-          <div id="quiz-summary-status" class="stat-pill" style="display:flex; justify-content:space-between; align-items:center;">
-            <span>ความคืบหน้าการตอบถูก: <strong id="quiz-score-count">0</strong> / 5 ข้อ</span>
-            <button class="theme-toggle-btn" id="btn-reset-quiz">↺ เริ่มทำใหม่</button>
+        <!-- จุดแก้ที่ 2: เพิ่ม novalidate ป้องกันข้อขัดข้อง browser default tooltip -->
+        <form id="form-posttest" novalidate class="space-y-8" onsubmit="event.preventDefault(); submitPosttest();">
+          <div id="posttest-questions-container" class="space-y-8"></div>
+          
+          <div class="pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <span id="posttest-validation-msg" class="text-sm text-rose-500 font-medium" role="alert"></span>
+            <button type="submit" class="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-medium transition">
+              ส่งคำตอบและดูผลการประเมิน &rarr;
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- View 4: Results & Normalized Gain -->
+      <section id="view-result" class="space-y-8 hidden">
+        <header class="border-b border-slate-200 dark:border-slate-800 pb-4">
+          <p class="text-xs uppercase tracking-wider font-semibold text-emerald-600 dark:text-emerald-400">รายงานผลสัมฤทธิ์ทางการเรียน</p>
+          <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mt-1">ผลการประเมินและการเรียนรู้</h1>
+        </header>
+
+        <!-- Metric Display Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+          <div class="space-y-1">
+            <span class="text-xs uppercase font-medium text-slate-500 dark:text-slate-400">ก่อนเรียน (Pre-test)</span>
+            <div class="text-3xl font-bold text-slate-800 dark:text-slate-100">
+              <span id="res-pre-score">0</span><span class="text-base font-normal text-slate-400"> / 8</span>
+            </div>
+            <p id="res-pre-pct" class="text-xs text-slate-500 dark:text-slate-400">0%</p>
+          </div>
+
+          <div class="space-y-1 sm:border-l sm:border-slate-200 sm:dark:border-slate-800 sm:pl-4">
+            <span class="text-xs uppercase font-medium text-slate-500 dark:text-slate-400">หลังเรียน (Post-test)</span>
+            <div class="text-3xl font-bold text-slate-800 dark:text-slate-100">
+              <span id="res-post-score">0</span><span class="text-base font-normal text-slate-400"> / 8</span>
+            </div>
+            <p id="res-post-pct" class="text-xs text-slate-500 dark:text-slate-400">0%</p>
+          </div>
+
+          <div class="space-y-1 sm:border-l sm:border-slate-200 sm:dark:border-slate-800 sm:pl-4">
+            <span class="text-xs uppercase font-medium text-sky-600 dark:text-sky-400 font-semibold">Normalized Gain (g)</span>
+            <div class="text-3xl font-bold text-sky-600 dark:text-sky-400">
+              <span id="res-gain-score">0.00</span>
+            </div>
+            <p id="res-gain-tier" class="text-xs font-medium text-slate-600 dark:text-slate-300">ระดับการพัฒนา: -</p>
           </div>
         </div>
 
-        <div id="quiz-list-container">
-          <!-- Quiz questions will be dynamically rendered here -->
+        <!-- Formula Explanation -->
+        <div class="space-y-3 text-sm text-slate-600 dark:text-slate-400 border-l-2 border-sky-500 pl-4 py-1">
+          <p class="font-medium text-slate-900 dark:text-slate-200">สูตรการคำนวณ Hake's Normalized Gain:</p>
+          <p class="font-mono text-xs">g = (Post - Pre) / (Total - Pre)</p>
+          <p id="gain-calc-breakdown" class="text-xs text-slate-500 dark:text-slate-400 font-mono"></p>
+          <div class="text-xs text-slate-500 dark:text-slate-400 mt-2 space-y-1">
+            <p>• ระดับสูง (High Gain): g &ge; 0.70</p>
+            <p>• ระดับปานกลาง (Medium Gain): 0.30 &le; g &lt; 0.70</p>
+            <p>• ระดับต่ำ (Low Gain): g &lt; 0.30</p>
+          </div>
         </div>
-      </div>
-    </section>
+
+        <!-- Comparison Table of Questions -->
+        <div class="space-y-3">
+          <h3 class="font-bold text-slate-900 dark:text-white text-lg">สรุปการตอบรายข้อ</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm border border-slate-200 dark:border-slate-800 divide-y divide-slate-200 dark:divide-slate-800">
+              <thead class="bg-slate-100 dark:bg-slate-800/60 font-semibold">
+                <tr>
+                  <th class="p-3 w-16">ข้อ</th>
+                  <th class="p-3">หัวข้อ</th>
+                  <th class="p-3 w-28 text-center">ก่อนเรียน</th>
+                  <th class="p-3 w-28 text-center">หลังเรียน</th>
+                  <th class="p-3 w-24 text-center">ผลลัพธ์</th>
+                </tr>
+              </thead>
+              <tbody id="res-detail-body" class="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-wrap gap-4 items-center justify-between">
+          <button type="button" onclick="resetModule()" class="px-5 py-2.5 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium text-slate-700 dark:text-slate-200">
+            ทำแบบทดสอบใหม่อีกครั้ง
+          </button>
+          <button type="button" onclick="goToView('lesson')" class="px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium hover:opacity-90">
+            กลับไปทบทวนบทเรียน
+          </button>
+        </div>
+      </section>
+
+    </div>
   </main>
 
-  <footer>
-    <div class="container" style="display:flex; flex-direction:column; gap:0.5rem;">
-      <div><strong>แหล่งอ้างอิงทางวิชาการ:</strong> W3C Web Content Accessibility Guidelines (WCAG) 2.1, ITU-R Recommendation BT.709, และ Harry Nyquist (1928) "Certain Topics in Telegraph Transmission Theory".</div>
-      <div><strong>ข้อจำกัดและข้อควรระวัง:</strong> ตัวเลขขนาดไฟล์และอัตราข้อมูลในแบบจำลองนี้เป็นค่าดิบตามสูตรทางคณิตศาสตร์เชิงทฤษฎี โดยไม่รวมโอเวอร์เฮดของไฟล์ฟอร์แมต (Container Header/Metadata) และในการบีบอัดจริงจะแปรผันตามเนื้อหาและอัลกอริทึมของตัวแปลงสัญญาณ (Codec)</div>
-    </div>
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+    แบบเรียนเชิงโต้ตอบ • คำนวณสัมประสิทธิ์การเรียนรู้ตามเกณฑ์ Hake's Gain Score (1998)
   </footer>
 
   <script>
-    const STORAGE_KEY = 'mmlab_mission_progress_v1';
-    let missionState = {
-      m1: false,
-      m2: false,
-      m3: false,
-      m4: false,
-      m5: false
-    };
-
-    function loadSavedState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && typeof parsed === 'object') {
-            missionState = { ...missionState, ...parsed };
-          }
-        }
-      } catch (err) {
-        console.warn('Could not read from localStorage:', err);
-      }
-      updateAllBadges();
-    }
-
-    function saveState() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(missionState));
-      } catch (err) {
-        console.warn('Could not write to localStorage:', err);
-      }
-      updateAllBadges();
-    }
-
-    function updateAllBadges() {
-      for (let i = 1; i <= 5; i++) {
-        const badgeEl = document.getElementById(`badge-${i}`);
-        if (badgeEl) {
-          if (missionState[`m${i}`]) {
-            badgeEl.classList.add('completed');
-          } else {
-            badgeEl.classList.remove('completed');
-          }
-        }
-      }
-    }
-
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabPanels = document.querySelectorAll('.station-panel');
-
-    tabButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        tabButtons.forEach(b => b.classList.remove('active'));
-        tabPanels.forEach(p => p.classList.remove('active'));
-
-        btn.classList.add('active');
-        const targetId = btn.getAttribute('data-tab');
-        const panel = document.getElementById(targetId);
-        if (panel) panel.classList.add('active');
-
-        // Trigger rerenders on canvases when switching tabs
-        if (targetId === 'tab-2') renderStation2();
-        if (targetId === 'tab-3') renderStation3();
-      });
-    });
-
-    const themeToggleBtn = document.getElementById('theme-toggle-btn');
-    themeToggleBtn.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme');
-      let next = 'dark';
-      if (current === 'dark') {
-        next = 'light';
-      } else if (current === 'light') {
-        next = 'dark';
-      } else {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        next = prefersDark ? 'light' : 'dark';
-      }
-      document.documentElement.setAttribute('data-theme', next);
-      renderStation2();
-      renderStation3();
-    });
-
-    const fgInput = document.getElementById('fg-color');
-    const bgInput = document.getElementById('bg-color');
-    const fontSizeSlider = document.getElementById('font-size-slider');
-    const fontWeightSelect = document.getElementById('font-weight-select');
-
-    const fgValLabel = document.getElementById('fg-val');
-    const bgValLabel = document.getElementById('bg-val');
-    const fontSizeValLabel = document.getElementById('font-size-val');
-
-    const statContrastRatio = document.getElementById('stat-contrast-ratio');
-    const statLuminance = document.getElementById('stat-luminance');
-    const statAaBadge = document.getElementById('stat-aa-badge');
-    const statAaaBadge = document.getElementById('stat-aaa-badge');
-    const textPreviewBox = document.getElementById('text-preview-box');
-    const previewTextTh = document.getElementById('preview-text-th');
-    const previewTextEn = document.getElementById('preview-text-en');
-    const mission1Box = document.getElementById('mission-1-box');
-    const mission1Flag = document.getElementById('mission-1-flag');
-
-    function hexToRgb(hex) {
-      hex = hex.replace('#', '');
-      if (hex.length === 3) {
-        hex = hex.split('').map(c => c + c).join('');
-      }
-      const num = parseInt(hex, 16);
-      return {
-        r: (num >> 16) & 255,
-        g: (num >> 8) & 255,
-        b: num & 255
-      };
-    }
-
-    // Official WCAG 2.1 relative luminance formula
-    function sRgbToLinear(c8) {
-      const c = c8 / 255;
-      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-    }
-
-    function calculateLuminance(r, g, b) {
-      const rLin = sRgbToLinear(r);
-      const gLin = sRgbToLinear(g);
-      const bLin = sRgbToLinear(b);
-      return 0.2126 * rLin + 0.7152 * gLin + 0.0722 * bLin;
-    }
-
-    function calculateContrastRatio(hex1, hex2) {
-      const rgb1 = hexToRgb(hex1);
-      const rgb2 = hexToRgb(hex2);
-      const l1 = calculateLuminance(rgb1.r, rgb1.g, rgb1.b);
-      const l2 = calculateLuminance(rgb2.r, rgb2.g, rgb2.b);
-      const lighter = Math.max(l1, l2);
-      const darker = Math.min(l1, l2);
-      const ratio = (lighter + 0.05) / (darker + 0.05);
-      return { ratio, l1, l2 };
-    }
-
-    function updateStation1() {
-      const fgHex = fgInput.value;
-      const bgHex = bgInput.value;
-      const fSize = parseInt(fontSizeSlider.value, 10);
-      const fWeight = parseInt(fontWeightSelect.value, 10);
-
-      fgValLabel.textContent = fgHex;
-      bgValLabel.textContent = bgHex;
-      fontSizeValLabel.textContent = `${fSize} px`;
-
-      // Visual text preview styling
-      textPreviewBox.style.backgroundColor = bgHex;
-      previewTextTh.style.color = fgHex;
-      previewTextTh.style.fontSize = `${fSize}px`;
-      previewTextTh.style.fontWeight = fWeight;
-
-      previewTextEn.style.color = fgHex;
-      previewTextEn.style.fontSize = `${fSize}px`;
-      previewTextEn.style.fontWeight = fWeight;
-
-      const { ratio, l1, l2 } = calculateContrastRatio(fgHex, bgHex);
-      statContrastRatio.textContent = `${ratio.toFixed(2)} : 1`;
-      statLuminance.textContent = `${l1.toFixed(3)} / ${l2.toFixed(3)}`;
-
-      // WCAG Definitions:
-      // Large text is at least 18pt (24px) or 14pt bold (18.66px bold)
-      const isBold = fWeight >= 700;
-      const isLargeText = fSize >= 24 || (isBold && fSize >= 18.66);
-
-      const passAA = isLargeText ? ratio >= 3.0 : ratio >= 4.5;
-      const passAAA = isLargeText ? ratio >= 4.5 : ratio >= 7.0;
-
-      if (passAA) {
-        statAaBadge.textContent = 'ผ่าน (Pass)';
-        statAaBadge.className = 'badge-pill-pass';
-      } else {
-        statAaBadge.textContent = 'ไม่ผ่าน (Fail)';
-        statAaBadge.className = 'badge-pill-fail';
-      }
-
-      if (passAAA) {
-        statAaaBadge.textContent = 'ผ่าน (Pass)';
-        statAaaBadge.className = 'badge-pill-pass';
-      } else {
-        statAaaBadge.textContent = 'ไม่ผ่าน (Fail)';
-        statAaaBadge.className = 'badge-pill-fail';
-      }
-
-      // Mission 1: Size <= 18, Regular weight (fWeight === 400), ratio >= 4.5
-      const missionPassed = (fSize <= 18) && (fWeight === 400) && (ratio >= 4.5);
-      if (missionPassed) {
-        mission1Box.classList.add('completed');
-        mission1Flag.textContent = '✓ สำเร็จแล้ว!';
-        if (!missionState.m1) {
-          missionState.m1 = true;
-          saveState();
-        }
-      } else {
-        mission1Box.classList.remove('completed');
-        mission1Flag.textContent = 'กำลังดำเนินการ';
-      }
-    }
-
-    fgInput.addEventListener('input', updateStation1);
-    bgInput.addEventListener('input', updateStation1);
-    fontSizeSlider.addEventListener('input', updateStation1);
-    fontWeightSelect.addEventListener('change', updateStation1);
-
-    const imgScaleSlider = document.getElementById('img-scale-slider');
-    const imgBpcSlider = document.getElementById('img-bpc-slider');
-    const imgScaleVal = document.getElementById('img-scale-val');
-    const imgBpcVal = document.getElementById('img-bpc-val');
-    const imgDimsVal = document.getElementById('img-dims-val');
-    const imgTotalColors = document.getElementById('img-total-colors');
-
-    const statImgRes = document.getElementById('stat-img-res');
-    const statImgColors = document.getElementById('stat-img-colors');
-    const statImgBytes = document.getElementById('stat-img-bytes');
-    const statImgMb = document.getElementById('stat-img-mb');
-    const imageCanvas = document.getElementById('image-canvas');
-    const imageCtx = imageCanvas.getContext('2d');
-
-    const mission2Box = document.getElementById('mission-2-box');
-    const mission2Flag = document.getElementById('mission-2-flag');
-
-    // Create pristine master 1280x720 canvas in memory
-    const masterCanvas = document.createElement('canvas');
-    masterCanvas.width = 1280;
-    masterCanvas.height = 720;
-    const masterCtx = masterCanvas.getContext('2d');
-
-    function drawMasterGraphic() {
-      const w = 1280;
-      const h = 720;
-
-      // 1. Sky Gradient
-      const skyGrad = masterCtx.createLinearGradient(0, 0, 0, h);
-      skyGrad.addColorStop(0, '#0f172a');
-      skyGrad.addColorStop(0.4, '#1e3a8a');
-      skyGrad.addColorStop(0.7, '#d97706');
-      skyGrad.addColorStop(1, '#fed7aa');
-      masterCtx.fillStyle = skyGrad;
-      masterCtx.fillRect(0, 0, w, h);
-
-      // 2. Glowing Sun
-      masterCtx.beginPath();
-      masterCtx.arc(w * 0.72, h * 0.42, 75, 0, Math.PI * 2);
-      masterCtx.fillStyle = '#ffedd5';
-      masterCtx.shadowColor = '#fbbf24';
-      masterCtx.shadowBlur = 40;
-      masterCtx.fill();
-      masterCtx.shadowBlur = 0; // reset
-
-      // 3. Distant Mountains
-      masterCtx.fillStyle = '#1e1b4b';
-      masterCtx.beginPath();
-      masterCtx.moveTo(0, h * 0.75);
-      masterCtx.lineTo(240, h * 0.52);
-      masterCtx.lineTo(480, h * 0.68);
-      masterCtx.lineTo(760, h * 0.48);
-      masterCtx.lineTo(1040, h * 0.65);
-      masterCtx.lineTo(1280, h * 0.54);
-      masterCtx.lineTo(1280, h);
-      masterCtx.lineTo(0, h);
-      masterCtx.closePath();
-      masterCtx.fill();
-
-      // 4. Closer Mountain ridge
-      masterCtx.fillStyle = '#0f172a';
-      masterCtx.beginPath();
-      masterCtx.moveTo(0, h * 0.82);
-      masterCtx.lineTo(350, h * 0.62);
-      masterCtx.lineTo(700, h * 0.78);
-      masterCtx.lineTo(1050, h * 0.58);
-      masterCtx.lineTo(1280, h * 0.72);
-      masterCtx.lineTo(1280, h);
-      masterCtx.lineTo(0, h);
-      masterCtx.closePath();
-      masterCtx.fill();
-
-      // 5. Fine detailed calibration grid lines & calibration circle
-      masterCtx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-      masterCtx.lineWidth = 1;
-      for (let x = 0; x < w; x += 40) {
-        masterCtx.beginPath();
-        masterCtx.moveTo(x, 0);
-        masterCtx.lineTo(x, h);
-        masterCtx.stroke();
-      }
-      for (let y = 0; y < h; y += 40) {
-        masterCtx.beginPath();
-        masterCtx.moveTo(0, y);
-        masterCtx.lineTo(w, y);
-        masterCtx.stroke();
-      }
-
-      // High-frequency concentric target
-      masterCtx.strokeStyle = '#38bdf8';
-      for (let r = 8; r <= 80; r += 8) {
-        masterCtx.beginPath();
-        masterCtx.arc(220, 220, r, 0, Math.PI * 2);
-        masterCtx.stroke();
-      }
-
-      // Calibration typography
-      masterCtx.font = 'bold 36px Kanit';
-      masterCtx.fillStyle = '#ffffff';
-      masterCtx.fillText('MM-LAB 1280×720 TEST PATTERN', 80, 80);
-      masterCtx.font = '20px Sarabun';
-      masterCtx.fillStyle = '#cbd5e1';
-      masterCtx.fillText('ทดสอบการแตกพิกเซลและความลึกสีดิจิทัล (Spatial & Color Resolution)', 80, 115);
-    }
-    drawMasterGraphic();
-
-    // Helper to quantize a single 8-bit channel to b bits (1..8)
-    function quantizeChannel(val, bits) {
-      if (bits >= 8) return val;
-      const levels = Math.pow(2, bits);
-      const step = 255 / (levels - 1);
-      return Math.round(Math.round(val / step) * step);
-    }
-
-    function renderStation2() {
-      const scalePercent = parseInt(imgScaleSlider.value, 10);
-      const bpc = parseInt(imgBpcSlider.value, 10);
-
-      const targetW = Math.max(1, Math.round(1280 * (scalePercent / 100)));
-      const targetH = Math.max(1, Math.round(720 * (scalePercent / 100)));
-
-      imgScaleVal.textContent = `${scalePercent}%`;
-      imgBpcVal.textContent = `${bpc} บิต/ช่อง`;
-      imgDimsVal.textContent = `${targetW} × ${targetH} พิกเซล`;
-
-      const totalColors = Math.pow(2, bpc * 3);
-      if (totalColors >= 1000000) {
-        imgTotalColors.textContent = `${(totalColors / 1000000).toFixed(1)} ล้านสี (${bpc * 3} บิต)`;
-        statImgColors.textContent = `${(totalColors / 1000000).toFixed(1)}M`;
-      } else {
-        imgTotalColors.textContent = `${totalColors.toLocaleString()} สี (${bpc * 3} บิต)`;
-        statImgColors.textContent = totalColors.toLocaleString();
-      }
-
-      // Raw File Size = Width * Height * BitsPerChannel * 3 / 8 bytes
-      const rawBytes = Math.round((targetW * targetH * (bpc * 3)) / 8);
-      const rawMb = rawBytes / (1024 * 1024);
-
-      statImgRes.textContent = `${targetW}×${targetH}`;
-      statImgBytes.textContent = `${rawBytes.toLocaleString()} B`;
-      statImgMb.textContent = `${rawMb.toFixed(2)} MB`;
-
-      // Step 1: Render downscaled to offscreen buffer
-      const offscreen = document.createElement('canvas');
-      offscreen.width = targetW;
-      offscreen.height = targetH;
-      const offCtx = offscreen.getContext('2d');
-      offCtx.imageSmoothingEnabled = false;
-      offCtx.drawImage(masterCanvas, 0, 0, targetW, targetH);
-
-      // Step 2: Apply color quantization on pixel data
-      const imgData = offCtx.getImageData(0, 0, targetW, targetH);
-      const data = imgData.data;
-      if (bpc < 8) {
-        const levels = Math.pow(2, bpc);
-        const step = 255 / (levels - 1);
-        for (let i = 0; i < data.length; i += 4) {
-          data[i]     = Math.round(Math.round(data[i] / step) * step);     // R
-          data[i + 1] = Math.round(Math.round(data[i + 1] / step) * step); // G
-          data[i + 2] = Math.round(Math.round(data[i + 2] / step) * step); // B
-        }
-        offCtx.putImageData(imgData, 0, 0);
-      }
-
-      // Step 3: Draw back to display canvas with nearest-neighbor scaling (imageSmoothingEnabled = false)
-      imageCtx.imageSmoothingEnabled = false;
-      imageCtx.clearRect(0, 0, imageCanvas.width, imageCanvas.height);
-      imageCtx.drawImage(offscreen, 0, 0, imageCanvas.width, imageCanvas.height);
-
-      // Mission 2: Raw size < 1MB (1,048,576 bytes) AND bpc === 8 AND targetW >= 640
-      const missionPassed = (rawBytes < 1048576) && (bpc === 8) && (targetW >= 640);
-      if (missionPassed) {
-        mission2Box.classList.add('completed');
-        mission2Flag.textContent = '✓ สำเร็จแล้ว!';
-        if (!missionState.m2) {
-          missionState.m2 = true;
-          saveState();
-        }
-      } else {
-        mission2Box.classList.remove('completed');
-        mission2Flag.textContent = 'กำลังดำเนินการ';
-      }
-    }
-
-    imgScaleSlider.addEventListener('input', renderStation2);
-    imgBpcSlider.addEventListener('input', () => {
-      renderStation2();
-      updateColorMixer();
-    });
-
-    // Quantization interactive mini-mixer
-    const testR = document.getElementById('test-r');
-    const testG = document.getElementById('test-g');
-    const testB = document.getElementById('test-b');
-    const rVal = document.getElementById('r-val');
-    const gVal = document.getElementById('g-val');
-    const bVal = document.getElementById('b-val');
-    const colorHexOut = document.getElementById('color-hex-out');
-    const colorSwatchOut = document.getElementById('color-swatch-out');
-
-    function updateColorMixer() {
-      const bpc = parseInt(imgBpcSlider.value, 10);
-      const rOrig = parseInt(testR.value, 10);
-      const gOrig = parseInt(testG.value, 10);
-      const bOrig = parseInt(testB.value, 10);
-
-      rVal.textContent = rOrig;
-      gVal.textContent = gOrig;
-      bVal.textContent = bOrig;
-
-      const qR = quantizeChannel(rOrig, bpc);
-      const qG = quantizeChannel(gOrig, bpc);
-      const qB = quantizeChannel(bOrig, bpc);
-
-      const toHex = (n) => n.toString(16).padStart(2, '0').toUpperCase();
-      const hexCode = `#${toHex(qR)}${toHex(qG)}${toHex(qB)}`;
-
-      colorHexOut.textContent = hexCode;
-      colorSwatchOut.style.backgroundColor = hexCode;
-    }
-
-    testR.addEventListener('input', updateColorMixer);
-    testG.addEventListener('input', updateColorMixer);
-    testB.addEventListener('input', updateColorMixer);
-
-    const audioRateSelect = document.getElementById('audio-rate-select');
-    const audioBitsSlider = document.getElementById('audio-bits-slider');
-    const audioBitsVal = document.getElementById('audio-bits-val');
-    const audioLevelsVal = document.getElementById('audio-levels-val');
-
-    const statNyquistStatus = document.getElementById('stat-nyquist-status');
-    const statAudioPoints = document.getElementById('stat-audio-points');
-    const statAudioLevels = document.getElementById('stat-audio-levels');
-    const statAudioRate = document.getElementById('stat-audio-rate');
-    const audioWaveCanvas = document.getElementById('audio-wave-canvas');
-    const audioWaveCtx = audioWaveCanvas.getContext('2d');
-
-    const btnPlayAudio = document.getElementById('btn-play-audio');
-    const audioMsgNotice = document.getElementById('audio-msg-notice');
-    const mission3Box = document.getElementById('mission-3-box');
-    const mission3Flag = document.getElementById('mission-3-flag');
-
-    const AUDIO_FREQ = 440; // 440 Hz
-    let audioCtx = null;
-
-    function renderStation3() {
-      const sampleRate = parseInt(audioRateSelect.value, 10);
-      const bitDepth = parseInt(audioBitsSlider.value, 10);
-      const numLevels = Math.pow(2, bitDepth);
-
-      audioBitsVal.textContent = `${bitDepth} บิต`;
-      audioLevelsVal.textContent = `${numLevels.toLocaleString()} ระดับแรงดันไฟฟ้า`;
-
-      // Nyquist condition: Sample Rate > 2 * Freq (440 * 2 = 880 Hz)
-      const nyquistPass = sampleRate > (2 * AUDIO_FREQ);
-      statNyquistStatus.textContent = nyquistPass ? '✓ ผ่านเกณฑ์ (>880Hz)' : '✗ ตกเกณฑ์ (เกิด Aliasing)';
-      statNyquistStatus.style.color = nyquistPass ? 'var(--success-border)' : 'var(--fail-border)';
-
-      const pointsPerPeriod = (sampleRate / AUDIO_FREQ).toFixed(2);
-      statAudioPoints.textContent = pointsPerPeriod;
-      statAudioLevels.textContent = numLevels.toLocaleString();
-
-      // Mono raw bitrate = SampleRate * BitDepth / 8 bytes/second
-      const rawBytesPerSec = (sampleRate * bitDepth) / 8;
-      const rawKbPerSec = (rawBytesPerSec / 1024).toFixed(1);
-      statAudioRate.textContent = `${rawKbPerSec} KB/s (${rawBytesPerSec.toLocaleString()} B/s)`;
-
-      // Draw Waveforms (2 periods of 440Hz: T = 2 / 440 seconds)
-      const totalDuration = 2 / AUDIO_FREQ;
-      const canvasW = audioWaveCanvas.width;
-      const canvasH = audioWaveCanvas.height;
-      const midY = canvasH / 2;
-      const amp = canvasH * 0.4;
-
-      audioWaveCtx.clearRect(0, 0, canvasW, canvasH);
-
-      // Grid line and axes
-      audioWaveCtx.strokeStyle = '#334155';
-      audioWaveCtx.lineWidth = 1;
-      audioWaveCtx.beginPath();
-      audioWaveCtx.moveTo(0, midY);
-      audioWaveCtx.lineTo(canvasW, midY);
-      audioWaveCtx.stroke();
-
-      // Quantization voltage lines for low bit depths (visual guidance)
-      if (bitDepth <= 4) {
-        audioWaveCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-        for (let l = 0; l < numLevels; l++) {
-          const normVal = (l / (numLevels - 1)) * 2 - 1; // -1 to 1
-          const y = midY - normVal * amp;
-          audioWaveCtx.beginPath();
-          audioWaveCtx.moveTo(0, y);
-          audioWaveCtx.lineTo(canvasW, y);
-          audioWaveCtx.stroke();
-        }
-      }
-
-      // 1. Continuous Original Analog Sine Wave (Green thin line)
-      audioWaveCtx.strokeStyle = '#22c55e';
-      audioWaveCtx.lineWidth = 1.5;
-      audioWaveCtx.beginPath();
-      for (let px = 0; px <= canvasW; px++) {
-        const t = (px / canvasW) * totalDuration;
-        const val = Math.sin(2 * Math.PI * AUDIO_FREQ * t);
-        const py = midY - val * amp;
-        if (px === 0) audioWaveCtx.moveTo(px, py);
-        else audioWaveCtx.lineTo(px, py);
-      }
-      audioWaveCtx.stroke();
-
-      // 2. Sampling and Quantization Stairs
-      const sampleInterval = 1 / sampleRate;
-      const totalSamples = Math.ceil(totalDuration * sampleRate) + 1;
-
-      // Sample points & Stair-step quantized representation
-      const samplePoints = [];
-      for (let i = 0; i <= totalSamples; i++) {
-        const t = i * sampleInterval;
-        if (t > totalDuration * 1.05) break;
-        const rawSine = Math.sin(2 * Math.PI * AUDIO_FREQ * t);
-
-        // Quantize to bit depth
-        const step = 2 / (numLevels - 1);
-        const qIndex = Math.round((rawSine + 1) / step);
-        const qVal = Math.min(1, Math.max(-1, qIndex * step - 1));
-
-        const xPos = (t / totalDuration) * canvasW;
-        samplePoints.push({ x: xPos, y: midY - qVal * amp, rawY: midY - rawSine * amp });
-      }
-
-      // Draw quantized stair-step wave (Orange bold line)
-      audioWaveCtx.strokeStyle = '#f97316';
-      audioWaveCtx.lineWidth = 2.5;
-      audioWaveCtx.beginPath();
-      for (let i = 0; i < samplePoints.length; i++) {
-        const curr = samplePoints[i];
-        const next = samplePoints[i + 1] || { x: canvasW, y: curr.y };
-        if (i === 0) audioWaveCtx.moveTo(curr.x, curr.y);
-        audioWaveCtx.lineTo(next.x, curr.y);
-        if (i < samplePoints.length - 1) {
-          audioWaveCtx.lineTo(next.x, next.y);
-        }
-      }
-      audioWaveCtx.stroke();
-
-      // Draw Sample dots (Red circles)
-      audioWaveCtx.fillStyle = '#ef4444';
-      for (let i = 0; i < samplePoints.length; i++) {
-        const pt = samplePoints[i];
-        if (pt.x <= canvasW) {
-          audioWaveCtx.beginPath();
-          audioWaveCtx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
-          audioWaveCtx.fill();
-        }
-      }
-
-      // Mission 3 Check:
-      // Nyquist passed (>880) AND bitDepth >= 8 AND rawBytesPerSec <= 20 KB/s (20 * 1024 = 20480 B/s)
-      const missionPassed = nyquistPass && (bitDepth >= 8) && (rawBytesPerSec <= 20480);
-      if (missionPassed) {
-        mission3Box.classList.add('completed');
-        mission3Flag.textContent = '✓ สำเร็จแล้ว!';
-        if (!missionState.m3) {
-          missionState.m3 = true;
-          saveState();
-        }
-      } else {
-        mission3Box.classList.remove('completed');
-        mission3Flag.textContent = 'กำลังดำเนินการ';
-      }
-    }
-
-    audioRateSelect.addEventListener('change', renderStation3);
-    audioBitsSlider.addEventListener('input', renderStation3);
-
-    // Audio Playback using Web Audio API buffer synthesis
-    btnPlayAudio.addEventListener('click', () => {
-      const sampleRate = parseInt(audioRateSelect.value, 10);
-      const bitDepth = parseInt(audioBitsSlider.value, 10);
-      const numLevels = Math.pow(2, bitDepth);
-
-      audioMsgNotice.style.display = 'block';
-
-      if (sampleRate < 8000) {
-        audioMsgNotice.textContent = `⚠️️ อัตราสุ่ม ${sampleRate} Hz ต่ำกว่ามาตรฐานฮาร์ดแวร์เสียงของเบราว์เซอร์ (รองรับตั้งแต่ 8,000 Hz ขึ้นไป) กรุณาเลือก 8,000 Hz ขึ้นไปเพื่อทดลองฟัง`;
-        return;
-      }
-
-      try {
-        if (!audioCtx) {
-          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-          if (!AudioContextClass) {
-            audioMsgNotice.textContent = '❌ เว็บบราวเซอร์นี้ไม่รองรับ Web Audio API';
-            return;
-          }
-          audioCtx = new AudioContextClass();
-        }
-
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-
-        const duration = 1.0; // 1 second
-        // Create audio buffer at the target sample rate
-        const buffer = audioCtx.createBuffer(1, Math.floor(sampleRate * duration), sampleRate);
-        const channelData = buffer.getChannelData(0);
-        const step = 2 / (numLevels - 1);
-
-        for (let i = 0; i < channelData.length; i++) {
-          const t = i / sampleRate;
-          const raw = Math.sin(2 * Math.PI * AUDIO_FREQ * t);
-          // Quantize sample value
-          const qIndex = Math.round((raw + 1) / step);
-          const quantized = Math.min(1, Math.max(-1, qIndex * step - 1));
-          // Apply soft volume reduction (gain 0.15) for comfortable listening
-          channelData[i] = quantized * 0.15;
-        }
-
-        const source = audioCtx.createBufferSource();
-        source.buffer = buffer;
-        source.connect(audioCtx.destination);
-        source.start();
-
-        audioMsgNotice.textContent = `▶️ กำลังเล่นสัญญาณเสียง 440 Hz (สุ่ม ${sampleRate} Hz, ความลึก ${bitDepth} บิต) ระยะเวลา 1 วินาที`;
-        setTimeout(() => {
-          if (audioMsgNotice.textContent.startsWith('▶️')) {
-            audioMsgNotice.textContent = '⏹️ เล่นเสร็จสิ้นแล้ว';
-          }
-        }, 1100);
-
-      } catch (err) {
-        console.error('Audio playback error:', err);
-        audioMsgNotice.textContent = `❌ เกิดข้อผิดพลาดในการเล่นเสียง: ${err.message}`;
-      }
-    });
-
-    const videoFpsSlider = document.getElementById('video-fps-slider');
-    const videoCompSlider = document.getElementById('video-comp-slider');
-    const videoFpsVal = document.getElementById('video-fps-val');
-    const videoCompVal = document.getElementById('video-comp-val');
-
-    const statVidRawFrame = document.getElementById('stat-vid-raw-frame');
-    const statVidRawBitrate = document.getElementById('stat-vid-raw-bitrate');
-    const statVidCompBitrate = document.getElementById('stat-vid-comp-bitrate');
-    const statVidMinuteSize = document.getElementById('stat-vid-minute-size');
-    const videoCanvas = document.getElementById('video-canvas');
-    const videoCtx = videoCanvas.getContext('2d');
-
-    const mission4Box = document.getElementById('mission-4-box');
-    const mission4Flag = document.getElementById('mission-4-flag');
-
-    // Video calculation constants (1280x720 24-bit TrueColor)
-    const VID_W = 1280;
-    const VID_H = 720;
-    const RAW_BYTES_PER_FRAME = VID_W * VID_H * 3; // 2,764,800 bytes
-
-    function getCompressionRatio(sliderVal) {
-      // Logarithmic mapping: 0 -> 1:1, 100 -> 300:1
-      const minLog = Math.log(1);
-      const maxLog = Math.log(300);
-      const scale = minLog + (sliderVal / 100) * (maxLog - minLog);
-      return Math.exp(scale);
-    }
-
-    function updateVideoCalculations() {
-      const fps = parseInt(videoFpsSlider.value, 10);
-      const compSliderVal = parseInt(videoCompSlider.value, 10);
-      const compRatio = getCompressionRatio(compSliderVal);
-
-      videoFpsVal.textContent = `${fps} FPS`;
-      videoCompVal.textContent = compRatio <= 1.05 ? '1 : 1 (ไม่มีการบีบอัด)' : `1 : ${compRatio.toFixed(1)}`;
-
-      // Raw frame size in MB
-      const rawMbPerFrame = RAW_BYTES_PER_FRAME / (1024 * 1024);
-      statVidRawFrame.textContent = `${rawMbPerFrame.toFixed(2)} MB`;
-
-      // Raw Bitrate in bps = bytes_per_frame * fps * 8
-      const rawBitrateBps = RAW_BYTES_PER_FRAME * fps * 8;
-      const rawBitrateMbps = rawBitrateBps / 1000000;
-      statVidRawBitrate.textContent = `${rawBitrateMbps.toFixed(2)} Mbit/s`;
-
-      // Compressed Bitrate
-      const compBitrateBps = rawBitrateBps / compRatio;
-      const compBitrateMbps = compBitrateBps / 1000000;
-      statVidCompBitrate.textContent = `${compBitrateMbps.toFixed(2)} Mbit/s`;
-
-      // Size for 1 minute = (compBitrateBps / 8) * 60 bytes
-      const bytesPerMin = (compBitrateBps / 8) * 60;
-      const mbPerMin = bytesPerMin / (1024 * 1024);
-      statVidMinuteSize.textContent = `${mbPerMin >= 1024 ? (mbPerMin / 1024).toFixed(2) + ' GB' : mbPerMin.toFixed(0) + ' MB'}`;
-
-      // Mission 4: Compressed Bitrate <= 5.0 Mbit/s AND fps >= 24
-      const missionPassed = (compBitrateMbps <= 5.0) && (fps >= 24);
-      if (missionPassed) {
-        mission4Box.classList.add('completed');
-        mission4Flag.textContent = '✓ สำเร็จแล้ว!';
-        if (!missionState.m4) {
-          missionState.m4 = true;
-          saveState();
-        }
-      } else {
-        mission4Box.classList.remove('completed');
-        mission4Flag.textContent = 'กำลังดำเนินการ';
-      }
-    }
-
-    videoFpsSlider.addEventListener('input', updateVideoCalculations);
-    videoCompSlider.addEventListener('input', updateVideoCalculations);
-
-    // Dynamic Bouncing Ball Simulation respecting target FPS and reduced motion
-    let simBall = {
-      x: 100,
-      y: 100,
-      vx: 240, // pixels per second
-      vy: 180,
-      radius: 24
-    };
-    let lastSimTimestamp = 0;
-    let accumulatedTime = 0;
-    let videoFrameNumber = 0;
-
-    function runVideoSimulationLoop(timestamp) {
-      if (!lastSimTimestamp) lastSimTimestamp = timestamp;
-      const deltaSec = (timestamp - lastSimTimestamp) / 1000;
-      lastSimTimestamp = timestamp;
-
-      const fps = parseInt(videoFpsSlider.value, 10);
-      const frameInterval = 1 / fps;
-      accumulatedTime += deltaSec;
-
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      if (!prefersReducedMotion) {
-        // Step forward by fixed frame step when accumulated time threshold reached
-        while (accumulatedTime >= frameInterval) {
-          accumulatedTime -= frameInterval;
-          videoFrameNumber++;
-
-          // Update ball position
-          simBall.x += simBall.vx * frameInterval;
-          simBall.y += simBall.vy * frameInterval;
-
-          if (simBall.x - simBall.radius <= 0) {
-            simBall.x = simBall.radius;
-            simBall.vx = -simBall.vx;
-          } else if (simBall.x + simBall.radius >= videoCanvas.width) {
-            simBall.x = videoCanvas.width - simBall.radius;
-            simBall.vx = -simBall.vx;
-          }
-
-          if (simBall.y - simBall.radius <= 0) {
-            simBall.y = simBall.radius;
-            simBall.vy = -simBall.vy;
-          } else if (simBall.y + simBall.radius >= videoCanvas.height) {
-            simBall.y = videoCanvas.height - simBall.radius;
-            simBall.vy = -simBall.vy;
-          }
-        }
-      }
-
-      // Render video frame on canvas
-      videoCtx.fillStyle = '#0b1120';
-      videoCtx.fillRect(0, 0, videoCanvas.width, videoCanvas.height);
-
-      // Court boundaries
-      videoCtx.strokeStyle = '#1e293b';
-      videoCtx.lineWidth = 2;
-      videoCtx.strokeRect(10, 10, videoCanvas.width - 20, videoCanvas.height - 20);
-
-      // Ball shadow and body
-      videoCtx.beginPath();
-      videoCtx.arc(simBall.x, simBall.y, simBall.radius, 0, Math.PI * 2);
-      const ballGrad = videoCtx.createRadialGradient(
-        simBall.x - 6, simBall.y - 6, 2,
-        simBall.x, simBall.y, simBall.radius
-      );
-      ballGrad.addColorStop(0, '#fde047');
-      ballGrad.addColorStop(0.7, '#eab308');
-      ballGrad.addColorStop(1, '#a16207');
-      videoCtx.fillStyle = ballGrad;
-      videoCtx.fill();
-
-      // Motion speed indicator text
-      videoCtx.fillStyle = '#38bdf8';
-      videoCtx.font = '14px IBM Plex Mono';
-      videoCtx.fillText(`FRAME #${videoFrameNumber.toString().padStart(6, '0')}`, 24, 38);
-      videoCtx.fillText(`TIME: ${(videoFrameNumber / fps).toFixed(2)}s @ ${fps} FPS`, 24, 58);
-
-      requestAnimationFrame(runVideoSimulationLoop);
-    }
-
-    const quizQuestions = [
+    // 8 Questions dataset
+    const questions = [
       {
         id: 1,
-        question: "1. หากต้องการเลือกใช้สื่อมัลติมีเดียเพื่อนำเสนอขั้นตอนการทำงานของเครื่องยนต์ที่มีชิ้นส่วนเคลื่อนที่ซับซ้อน สื่อประเภทใดมีประสิทธิภาพสูงสุดต่อการเรียนรู้?",
+        topic: "Decomposition",
+        text: "การแบ่งปัญหาการสร้างรถยนต์ออกเป็นระบบเครื่องยนต์ ตัวถัง และระบบไฟฟ้า คือขั้นตอนใด?",
         options: [
-          { text: "ก. ข้อความบรรยายพร้อมตารางขนาดใหญ่", correct: false },
-          { text: "ข. ภาพถ่ายนิ่งความละเอียดสูง 4K หลาย ๆ มุม", correct: false },
-          { text: "ค. แอนิเมชันหรือวิดีโอที่มีอัตราเฟรมเหมาะสม แสดงการเคลื่อนไหวสัมพันธ์กัน", correct: true },
-          { text: "ง. คลิปเสียงบรรยายความถี่ 44,100 Hz 24 บิต", correct: false }
+          "การแยกส่วนประกอบ (Decomposition)",
+          "การหารูปแบบ (Pattern Recognition)",
+          "การคิดเชิงนามธรรม (Abstraction)",
+          "การออกแบบขั้นตอนวิธี (Algorithm Design)"
         ],
-        explanation: "การถ่ายทอดการเคลื่อนไหวที่มีความต่อเนื่องและมิติสัมพันธ์กัน (Kinematics) ต้องอาศัยภาพเคลื่อนไหวหรือวิดีโอ (Temporal media) เพื่อช่วยให้ผู้เรียนสร้าง Mental Model ได้แม่นยำที่สุด"
+        correct: 0
       },
       {
         id: 2,
-        question: "2. เมื่อนำภาพความละเอียด 64×36 พิกเซล มาขยายแสดงผลเต็มหน้าจอคอมพิวเตอร์ ทำไมภาพจึงดูแตกเป็นตารางสี่เหลี่ยม (Pixelated)?",
+        topic: "Pattern Recognition",
+        text: "การสังเกตว่ายอดขายไอศกรีมมักเพิ่มสูงขึ้นทุกฤดูร้อน จัดเป็นเสาหลักใด?",
         options: [
-          { text: "ก. จำนวนพิกเซลต้นฉบับมีน้อยเกินไป เมื่อขยายจึงต้องแสดงพิกเซลเดี่ยวขนาดใหญ่ขึ้น", correct: true },
-          { text: "ข. ความลึกบิตต่อช่องสีต่ำเกินไป ทำให้สีเพี้ยน", correct: false },
-          { text: "ค. เกิดความผิดพลาดจากการแปลงสัญญาณเสียง Nyquist", correct: false },
-          { text: "ง. อัตราเฟรมเรตของภาพต่ำเกินไป", correct: false }
+          "การออกแบบขั้นตอนวิธี (Algorithm Design)",
+          "การคิดเชิงนามธรรม (Abstraction)",
+          "การหารูปแบบ (Pattern Recognition)",
+          "การแยกส่วนประกอบ (Decomposition)"
         ],
-        explanation: "Spatial Resolution คือจำนวนพิกเซลต่อพื้นที่ หากภาพต้นฉบับมีจำนวนพิกเซลน้อย เมื่อนำมาขยาย แต่ละพิกเซลจะต้องถูกขยายให้กินพื้นที่หน้าจอมากขึ้นจนสายตามนุษย์แยกแยะเม็ดพิกเซลได้ชัดเจน"
+        correct: 2
       },
       {
         id: 3,
-        question: "3. ในการบันทึกเสียงคลื่นความถี่ 440 Hz หากใช้อัตราการสุ่มตัวอย่าง (Sampling Rate) เพียง 800 Hz เสียงที่ได้ยินจะเกิดปรากฏการณ์ใดตามทฤษฎี Nyquist?",
+        topic: "Abstraction",
+        text: "การสร้างแผนที่เส้นทางรถไฟฟ้าโดยตัดตึกและสิ่งกีดขวางรอบข้างออก เพื่อให้ดูง่าย คือหลักการใด?",
         options: [
-          { text: "ก. เสียงใส คมชัด เหมือนต้นฉบับทุกประการ", correct: false },
-          { text: "ข. เกิดภาวะ Aliasing ทำให้ความถี่เพี้ยนกลายเป็นความถี่หลอน (Phantom Frequency) ปะปน", correct: true },
-          { text: "ค. ขนาดไฟล์เสียงจะใหญ่กว่ามาตรฐานทั่วไป 10 เท่า", correct: false },
-          { text: "ง. ความดังของเสียงจะเพิ่มขึ้นเป็น 2 เท่า", correct: false }
+          "การคิดเชิงนามธรรม (Abstraction)",
+          "การออกแบบขั้นตอนวิธี (Algorithm Design)",
+          "การหารูปแบบ (Pattern Recognition)",
+          "การแตกข้อย่อย (Decomposition)"
         ],
-        explanation: "ทฤษฎีบทการสุ่มตัวอย่างของ Nyquist ระบุว่า fs ต้องมากกว่า 2 เท่าของความถี่สูงสุด (fs > 2×440 = 880 Hz) หากสุ่มต่ำกว่า 880 Hz คลื่นที่กู้คืนจะพับความถี่ (Fold back) เกิดเป็นความถี่หลอกหรือ Aliasing"
+        correct: 0
       },
       {
         id: 4,
-        question: "4. ตามเกณฑ์การเข้าถึงเว็บ WCAG 2.1 หากใช้ตัวอักษรสีเทาอ่อนบนพื้นหลังสีขาว โดยวัด Contrast Ratio ได้ 2.3:1 สื่อนี้มีปัญหาอย่างไร?",
+        topic: "Algorithm",
+        text: "ข้อใดคือคุณสมบัติที่สำคัญที่สุดของขั้นตอนวิธี (Algorithm)?",
         options: [
-          { text: "ก. เหมาะสมและสบายตาดีมากสำหรับผู้สูงอายุ", correct: false },
-          { text: "ข. ผ่านเกณฑ์ระดับ AAA แต่ไม่ผ่าน AA", correct: false },
-          { text: "ค. ไม่ผ่านเกณฑ์ขั้นต่ำ AA (ต้องการอย่างน้อย 4.5:1 สำหรับข้อความปกติ) อ่านยากและไม่ทั่วถึง", correct: true },
-          { text: "ง. ทำให้ขนาดไฟล์ HTML ใหญ่ขึ้นผิดปกติ", correct: false }
+          "ต้องเขียนด้วยภาษาไพทอนเท่านั้น",
+          "มีลำดับชัดเจน ไม่กำกวม และสิ้นสุดได้",
+          "ต้องมีจำนวนขั้นตอนมากกว่า 100 ขั้นตอน",
+          "ต้องใช้ภาพประกอบเสมอ"
         ],
-        explanation: "WCAG กำหนดให้อักษรปกติมี Contrast Ratio อย่างน้อย 4.5:1 (ระดับ AA) ค่า 2.3:1 จึงต่ำเกินไป ส่งผลให้ผู้มีความบกพร่องทางการมองเห็นหรือบุคคลทั่วไปในสภาพแสงจ้าอ่านข้อความไม่ออก"
+        correct: 1
       },
       {
         id: 5,
-        question: "5. เหตุใดไฟล์วิดีโอดิจิทัลแบบดิบ (Uncompressed 1080p หรือ 720p) จึงแทบไม่สามารถนำมาสตรีมผ่านเครือข่ายอินเทอร์เน็ตได้โดยตรง?",
+        topic: "Abstraction",
+        text: "เมื่อเขียนโปรแกรมจำลองร้านกาแฟ ข้อมูลใดควรถูกตัดทิ้งด้วยการคิดเชิงนามธรรม?",
         options: [
-          { text: "ก. อัตราส่งข้อมูลดิบสูงหลายร้อยถึงพัน Mbit/s เกินกว่าแบนด์วิดท์ทั่วไป จึงจำเป็นต้องผ่านการบีบอัด (Compression)", correct: true },
-          { text: "ข. ไฟล์วิดีโอดิบมีอัตราเฟรมสูงเกิน 1,000 FPS เสมอ", correct: false },
-          { text: "ค. จอภาพคอมพิวเตอร์รองรับเฉพาะภาพนิ่งเท่านั้น", correct: false },
-          { text: "ง. รัฐบาลกำหนดให้วิดีโอต้องมีขนาดไม่เกิน 1 MB เสมอ", correct: false }
+          "ราคากาแฟ",
+          "ชื่อเมนูกาแฟ",
+          "สีเสื้อของลูกค้า",
+          "ขนาดแก้ว"
         ],
-        explanation: "วิดีโอดิบ 720p 30 FPS มีอัตราบิตดิบสูงถึง ~663 Mbit/s ซึ่งเกินขีดความสามารถของแบนด์วิดท์เครือข่าย การเข้ารหัสด้วย Codec (เช่น H.264, HEVC) จึงเป็นหัวใจสำคัญเพื่อลดขนาดข้อมูลลงนับสิบถึงร้อยเท่า"
+        correct: 2
+      },
+      {
+        id: 6,
+        topic: "Decomposition",
+        text: "ในการวางแผนงานกีฬาสี ขั้นตอนใดเป็นการใช้ Decomposition?",
+        options: [
+          "คาดการณ์ว่าปีนี้นักเรียนจะเหนื่อยเหมือนปีก่อน",
+          "แบ่งหน้าที่เป็น ฝ่ายเชียร์ ฝ่ายพยาบาล ฝ่ายสถานที่ และฝ่ายอาหาร",
+          "เขียนขั้นตอนการร้องเพลงชาติ",
+          "ละเว้นรายชื่อผู้ปกครองที่มาร่วมงาน"
+        ],
+        correct: 1
+      },
+      {
+        id: 7,
+        topic: "Algorithm",
+        text: "สูตรอาหารระบุว่า: '1. ต้มน้ำให้เดือด 2. ใส่เส้น 3. รอ 3 นาที 4. ยกขึ้นสะเด็ดน้ำ' จัดเป็นอะไร?",
+        options: [
+          "Pattern Recognition",
+          "Algorithm Design",
+          "Abstraction",
+          "Decomposition"
+        ],
+        correct: 1
+      },
+      {
+        id: 8,
+        topic: "Pattern Recognition",
+        text: "การตรวจจับใบหน้าจากภาพถ่ายโดยมองหาตำแหน่งตา จมูก ปากที่สัมพันธ์กัน เป็นการประยุกต์ใช้สิ่งใด?",
+        options: [
+          "การหารูปแบบ (Pattern Recognition)",
+          "การคิดเชิงนามธรรม (Abstraction)",
+          "การแยกส่วนประกอบ (Decomposition)",
+          "การกำหนดขั้นตอนจำลอง (Simulation)"
+        ],
+        correct: 0
       }
     ];
 
-    const quizListContainer = document.getElementById('quiz-list-container');
-    const quizScoreCount = document.getElementById('quiz-score-count');
-    const btnResetQuiz = document.getElementById('btn-reset-quiz');
-    let quizUserAnswers = {};
+    // State
+    const state = {
+      preAnswers: {},
+      postAnswers: {},
+      theme: 'light'
+    };
 
-    function renderQuiz() {
-      quizListContainer.innerHTML = '';
-      let correctAnswersCount = 0;
+    // Render questions into target container with accessible label associations
+    function renderQuestions(containerId, prefix) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = questions.map((q, idx) => `
+        <fieldset class="border-b border-slate-200 dark:border-slate-800 pb-6">
+          <legend class="font-semibold text-slate-900 dark:text-white mb-3">
+            <span class="text-sky-600 dark:text-sky-400 font-mono">${idx + 1}.</span> ${q.text}
+          </legend>
+          <div class="space-y-2">
+            ${q.options.map((opt, optIdx) => {
+              const inputId = `${prefix}_q_${q.id}_opt_${optIdx}`;
+              return `
+                <div class="flex items-start space-x-3 p-2 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
+                  <input 
+                    type="radio" 
+                    id="${inputId}"
+                    name="${prefix}_q_${q.id}" 
+                    value="${optIdx}" 
+                    class="mt-1 w-4 h-4 text-sky-600 focus:ring-sky-500 border-slate-300 dark:border-slate-700 cursor-pointer"
+                  >
+                  <label for="${inputId}" class="text-slate-700 dark:text-slate-300 cursor-pointer select-none flex-1">
+                    ${opt}
+                  </label>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </fieldset>
+      `).join('');
+    }
 
-      quizQuestions.forEach((q, qIndex) => {
-        const card = document.createElement('div');
-        card.className = 'quiz-card';
-
-        const title = document.createElement('h3');
-        title.style.fontSize = '1.05rem';
-        title.textContent = q.question;
-        card.appendChild(title);
-
-        const optsDiv = document.createElement('div');
-        optsDiv.className = 'quiz-options';
-
-        const feedbackDiv = document.createElement('div');
-        feedbackDiv.className = 'quiz-feedback';
-
-        const userChosen = quizUserAnswers[q.id];
-
-        q.options.forEach((opt, optIndex) => {
-          const btn = document.createElement('button');
-          btn.className = 'quiz-opt-btn';
-          btn.textContent = opt.text;
-
-          if (userChosen !== undefined) {
-            btn.disabled = true;
-            if (opt.correct) {
-              btn.classList.add('correct');
-            } else if (userChosen === optIndex) {
-              btn.classList.add('wrong');
-            }
-          } else {
-            btn.addEventListener('click', () => {
-              quizUserAnswers[q.id] = optIndex;
-              renderQuiz();
-            });
-          }
-
-          optsDiv.appendChild(btn);
-        });
-
-        card.appendChild(optsDiv);
-
-        if (userChosen !== undefined) {
-          const isCorrect = q.options[userChosen].correct;
-          if (isCorrect) correctAnswersCount++;
-
-          feedbackDiv.style.display = 'block';
-          feedbackDiv.style.backgroundColor = isCorrect ? 'var(--success-bg)' : 'var(--fail-bg)';
-          feedbackDiv.style.color = isCorrect ? 'var(--success-text)' : 'var(--fail-text)';
-          feedbackDiv.innerHTML = `<strong>${isCorrect ? '✓ ถูกต้อง' : '✗ ยังไม่ถูกต้อง'}:</strong> ${q.explanation}`;
-          card.appendChild(feedbackDiv);
-        }
-
-        quizListContainer.appendChild(card);
+    // Switch visible view
+    function goToView(viewName) {
+      const views = ['pretest', 'lesson', 'posttest', 'result'];
+      views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.toggle('hidden', v !== viewName);
       });
 
-      quizScoreCount.textContent = correctAnswersCount;
+      const indicator = document.getElementById('step-indicator');
+      const stepMap = {
+        pretest: 'ขั้นตอนที่ 1/4 (ก่อนเรียน)',
+        lesson: 'ขั้นตอนที่ 2/4 (บทเรียน)',
+        posttest: 'ขั้นตอนที่ 3/4 (หลังเรียน)',
+        result: 'ขั้นตอนที่ 4/4 (สรุปผล)'
+      };
+      if (indicator) indicator.textContent = stepMap[viewName] || '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-      // Mission 5 Check: All 5 questions correct
-      if (correctAnswersCount === quizQuestions.length) {
-        if (!missionState.m5) {
-          missionState.m5 = true;
-          saveState();
+    // Pretest Submission
+    function submitPretest() {
+      const form = document.getElementById('form-pretest');
+      const formData = new FormData(form);
+      const answers = {};
+      let allAnswered = true;
+
+      questions.forEach(q => {
+        const val = formData.get(`pre_q_${q.id}`);
+        if (val === null) {
+          allAnswered = false;
+        } else {
+          answers[q.id] = parseInt(val, 10);
         }
+      });
+
+      const validationMsg = document.getElementById('pretest-validation-msg');
+      if (!allAnswered) {
+        if (validationMsg) validationMsg.textContent = 'กรุณาตอบคำถามให้ครบทั้ง 8 ข้อก่อนดำเนินการต่อ';
+        return;
+      }
+      if (validationMsg) validationMsg.textContent = '';
+
+      state.preAnswers = answers;
+      goToView('lesson');
+    }
+
+    // Posttest Submission
+    function submitPosttest() {
+      const form = document.getElementById('form-posttest');
+      const formData = new FormData(form);
+      const answers = {};
+      let allAnswered = true;
+
+      questions.forEach(q => {
+        const val = formData.get(`post_q_${q.id}`);
+        if (val === null) {
+          allAnswered = false;
+        } else {
+          answers[q.id] = parseInt(val, 10);
+        }
+      });
+
+      const validationMsg = document.getElementById('posttest-validation-msg');
+      if (!allAnswered) {
+        if (validationMsg) validationMsg.textContent = 'กรุณาตอบคำถามให้ครบทั้ง 8 ข้อก่อนดำเนินการต่อ';
+        return;
+      }
+      if (validationMsg) validationMsg.textContent = '';
+
+      state.postAnswers = answers;
+      calculateAndRenderResults();
+      goToView('result');
+    }
+
+    // จุดแก้ที่ 3: ปรับปรุงการคำนวณ Hake's Gain ให้ถูกต้อง ครอบคลุมเคสขอบเขต และป้องกัน -0.00 หรือ NaN
+    function calculateAndRenderResults() {
+      let preScore = 0;
+      let postScore = 0;
+      const total = questions.length;
+
+      questions.forEach(q => {
+        if (state.preAnswers[q.id] === q.correct) preScore++;
+        if (state.postAnswers[q.id] === q.correct) postScore++;
+      });
+
+      let gain = 0;
+      let breakdownText = '';
+
+      if (preScore === total) {
+        // กรณีคะแนนก่อนเรียนเต็ม 8/8
+        gain = (postScore === total) ? 1.0 : (postScore - preScore) / total;
+        breakdownText = `คำนวณกรณีคะแนนก่อนเรียนเต็ม: (${postScore} - ${preScore}) / ${total} = ${gain.toFixed(2)}`;
       } else {
-        missionState.m5 = false;
-        saveState();
+        const denominator = total - preScore;
+        const numerator = postScore - preScore;
+        gain = numerator / denominator;
+        breakdownText = `คำนวณจริง: (${postScore} - ${preScore}) / (${total} - ${preScore}) = ${numerator} / ${denominator} = ${gain.toFixed(2)}`;
+      }
+
+      // ป้องกันค่า -0 ใน JavaScript formatting
+      let gainRounded = Math.round(gain * 100) / 100;
+      if (Object.is(gainRounded, -0) || Math.abs(gainRounded) < 0.0001) {
+        gainRounded = 0;
+      }
+      const gainDisplay = gainRounded.toFixed(2);
+
+      let tier = '';
+      if (gainRounded >= 0.70) {
+        tier = 'ระดับสูง (High Gain &ge; 0.70)';
+      } else if (gainRounded >= 0.30) {
+        tier = 'ระดับปานกลาง (Medium Gain 0.30 - 0.69)';
+      } else {
+        tier = 'ระดับต่ำ (Low Gain < 0.30)';
+      }
+
+      // Populate Metric Displays
+      document.getElementById('res-pre-score').textContent = preScore;
+      document.getElementById('res-pre-pct').textContent = `${Math.round((preScore / total) * 100)}% ถูกต้อง`;
+
+      document.getElementById('res-post-score').textContent = postScore;
+      document.getElementById('res-post-pct').textContent = `${Math.round((postScore / total) * 100)}% ถูกต้อง`;
+
+      document.getElementById('res-gain-score').textContent = gainDisplay;
+      document.getElementById('res-gain-tier').innerHTML = `ระดับการพัฒนา: ${tier}`;
+      document.getElementById('gain-calc-breakdown').textContent = breakdownText;
+
+      // Render Itemized Comparison
+      const tbody = document.getElementById('res-detail-body');
+      tbody.innerHTML = questions.map((q, idx) => {
+        const preCorrect = state.preAnswers[q.id] === q.correct;
+        const postCorrect = state.postAnswers[q.id] === q.correct;
+
+        let statusText = '';
+        if (!preCorrect && postCorrect) {
+          statusText = '<span class="text-emerald-600 dark:text-emerald-400 font-semibold">+ พัฒนาขึ้น</span>';
+        } else if (preCorrect && postCorrect) {
+          statusText = '<span class="text-sky-600 dark:text-sky-400">คงที่ (ถูก)</span>';
+        } else if (!preCorrect && !postCorrect) {
+          statusText = '<span class="text-slate-400">คงที่ (ผิด)</span>';
+        } else {
+          statusText = '<span class="text-rose-500 font-medium">- ลดลง</span>';
+        }
+
+        return `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+            <td class="p-3 font-mono text-xs text-slate-400">${idx + 1}</td>
+            <td class="p-3 text-slate-700 dark:text-slate-300">${q.topic}</td>
+            <td class="p-3 text-center ${preCorrect ? 'text-emerald-600 font-bold' : 'text-rose-500'}">${preCorrect ? '✓' : '✗'}</td>
+            <td class="p-3 text-center ${postCorrect ? 'text-emerald-600 font-bold' : 'text-rose-500'}">${postCorrect ? '✓' : '✗'}</td>
+            <td class="p-3 text-center text-xs">${statusText}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Mini interactive quiz feedback in lesson
+    function checkMiniQuiz(button, isCorrect) {
+      const feedback = document.getElementById('mini-quiz-feedback');
+      if (isCorrect) {
+        feedback.textContent = '✓ ถูกต้อง! ผังงานเป็นตัวแทนขั้นตอนวิธี (Algorithm Design) ที่แจกแจงลำดับคำสั่งชัดเจน';
+        feedback.className = 'text-xs mt-2 font-medium text-emerald-600 dark:text-emerald-400';
+      } else {
+        feedback.textContent = '✗ ยังไม่ถูกต้อง ลองพิจารณาเรื่องการวางลำดับการทำงานทีละขั้นดูอีกครั้ง';
+        feedback.className = 'text-xs mt-2 font-medium text-rose-500';
       }
     }
 
-    btnResetQuiz.addEventListener('click', () => {
-      quizUserAnswers = {};
-      renderQuiz();
-    });
+    // จุดแก้ที่ 4: ล้างค่า Validation Messages และสถานะตกค้างทั้งหมดเมื่อรีเซ็ตโมดูล
+    function resetModule() {
+      state.preAnswers = {};
+      state.postAnswers = {};
+      
+      const formPre = document.getElementById('form-pretest');
+      const formPost = document.getElementById('form-posttest');
+      if (formPre) formPre.reset();
+      if (formPost) formPost.reset();
 
-    window.onload = function() {
-      loadSavedState();
-      updateStation1();
-      renderStation2();
-      updateColorMixer();
-      renderStation3();
-      updateVideoCalculations();
-      renderQuiz();
-      requestAnimationFrame(runVideoSimulationLoop);
-    };
+      const preMsg = document.getElementById('pretest-validation-msg');
+      const postMsg = document.getElementById('posttest-validation-msg');
+      const miniMsg = document.getElementById('mini-quiz-feedback');
+      if (preMsg) preMsg.textContent = '';
+      if (postMsg) postMsg.textContent = '';
+      if (miniMsg) miniMsg.textContent = '';
+
+      goToView('pretest');
+    }
+
+    // Quick test helpers
+    function loadTestPreset(targetCorrect) {
+      questions.forEach((q, idx) => {
+        const pickCorrect = idx < targetCorrect;
+        const chosen = pickCorrect ? q.correct : ((q.correct + 1) % q.options.length);
+        const radio = document.querySelector(`input[name="pre_q_${q.id}"][value="${chosen}"]`);
+        if (radio) radio.checked = true;
+      });
+      const validationMsg = document.getElementById('pretest-validation-msg');
+      if (validationMsg) validationMsg.textContent = '';
+    }
+
+    function loadPostPreset(targetCorrect) {
+      questions.forEach((q, idx) => {
+        const pickCorrect = idx < targetCorrect;
+        const chosen = pickCorrect ? q.correct : ((q.correct + 1) % q.options.length);
+        const radio = document.querySelector(`input[name="post_q_${q.id}"][value="${chosen}"]`);
+        if (radio) radio.checked = true;
+      });
+      const validationMsg = document.getElementById('posttest-validation-msg');
+      if (validationMsg) validationMsg.textContent = '';
+    }
+
+    // Theme toggler
+    function initTheme() {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const savedTheme = localStorage.getItem('theme');
+      const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+      
+      applyTheme(isDark);
+
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        const isCurrentDark = document.documentElement.classList.contains('dark');
+        applyTheme(!isCurrentDark);
+      });
+    }
+
+    function applyTheme(isDark) {
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        document.getElementById('theme-icon-light').classList.remove('hidden');
+        document.getElementById('theme-icon-dark').classList.add('hidden');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        document.getElementById('theme-icon-light').classList.add('hidden');
+        document.getElementById('theme-icon-dark').classList.remove('hidden');
+      }
+    }
+
+    // Initialization on DOM load
+    document.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      renderQuestions('pretest-questions-container', 'pre');
+      renderQuestions('posttest-questions-container', 'post');
+      goToView('pretest');
+    });
   </script>
 </body>
 </html>
